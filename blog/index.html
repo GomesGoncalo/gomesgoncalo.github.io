@@ -188,6 +188,17 @@
   .tag-filter.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
   .tag-count { opacity: 0.6; font-size: 9px; }
 
+  .rss-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin-top: 1rem;
+    font-size: 11px;
+    color: var(--text3);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .rss-link:hover { color: var(--amber); }
+
   @media (max-width: 600px) {
     .search-wrap { max-width: 100%; }
     .blog-count { margin-left: 0; }
@@ -226,6 +237,10 @@
       </div>
       <h1 class="page-title">The <span class="accent">Blog</span></h1>
       <p class="page-subtitle">Notes on systems, software, and the occasional rabbit hole.</p>
+      <a href="/rss.xml" class="rss-link" title="Subscribe via RSS">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3a1 1 0 0 0 0 2 16 16 0 0 1 16 16 1 1 0 0 0 2 0A18 18 0 0 0 3 3zm0 6a1 1 0 0 0 0 2 10 10 0 0 1 10 10 1 1 0 0 0 2 0A12 12 0 0 0 3 9zm0 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+        RSS feed
+      </a>
     </header>
 
     <div class="blog-controls">
