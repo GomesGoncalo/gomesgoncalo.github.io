@@ -21,6 +21,8 @@ def parse_frontmatter(text):
         key, val = key.strip(), val.strip()
         if val.startswith('[') and val.endswith(']'):
             val = [t.strip().strip('\'"') for t in val[1:-1].split(',') if t.strip()]
+        elif len(val) >= 2 and val[0] == val[-1] and val[0] in ('"', "'"):
+            val = val[1:-1]
         meta[key] = val
     return meta, text[m.end():]
 
