@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post — Gonçalo Gomes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<style>
+  :root {
+    --bg: #0a0e13;
+    --bg2: #0f141b;
+    --bg3: #141b24;
+    --surface: #1a2230;
+    --border: #1e2d3d;
+    --border2: #263545;
+    --green: #00ff88;
+    --green2: #00cc6a;
+    --green-dim: rgba(0,255,136,0.08);
+    --green-glow: rgba(0,255,136,0.15);
+    --blue: #4db8ff;
+    --amber: #ffb347;
+    --red: #ff5f57;
+    --text: #e2e8f0;
+    --text2: #8899aa;
+    --text3: #4d6070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  ::selection { background: var(--green-glow); color: var(--green); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,14,19,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--text3); }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 12px;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::before { content: '# '; color: var(--green); opacity: 0; transition: opacity 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::before { opacity: 1; }
+  .nav-links a.active { color: var(--green); }
+  .nav-links a.active::before { opacity: 1; }
+
+  .nav-burger {
+    display: none;
+    flex-direction: column; gap: 5px; cursor: pointer;
+    background: none; border: none; padding: 4px;
+  }
+  .nav-burger span {
+    display: block; width: 20px; height: 1.5px;
+    background: var(--text2); border-radius: 1px; transition: all 0.2s;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 720px; margin: 0 auto; padding: 0 2rem; }
+
+  /* POST HEADER */
+  .post-header {
+    padding: 7rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+
+  .terminal-line {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 12px; color: var(--text3); margin-bottom: 1.5rem;
+  }
+  .prompt-sym { color: var(--green); }
+  .prompt-path { color: var(--blue); }
+  .prompt-cmd { color: var(--text2); }
+
+  .post-title {
+    font-family: var(--sans);
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .post-meta-bar {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .post-date { font-size: 12px; color: var(--text3); }
+  .post-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-size: 10px;
+    color: var(--green2);
+    background: var(--green-dim);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 3px;
+    padding: 1px 6px;
+    letter-spacing: 0.03em;
+  }
+
+  /* MARKDOWN CONTENT */
+  .post-content {
+    padding-bottom: 4rem;
+  }
+
+  .post-content h1,
+  .post-content h2,
+  .post-content h3,
+  .post-content h4 {
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--text);
+    margin: 2.5rem 0 1rem;
+    line-height: 1.3;
+  }
+  .post-content h1 { font-size: 1.9rem; }
+  .post-content h2 {
+    font-size: 1.35rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .post-content h3 { font-size: 1.1rem; color: var(--text2); }
+  .post-content h4 { font-size: 0.95rem; color: var(--text3); }
+
+  .post-content p { margin-bottom: 1.4rem; color: var(--text2); line-height: 1.8; }
+
+  .post-content a { color: var(--green); text-underline-offset: 3px; }
+  .post-content a:hover { color: var(--green2); }
+
+  .post-content ul,
+  .post-content ol {
+    margin: 0 0 1.4rem 1.5rem;
+    color: var(--text2);
+  }
+  .post-content li { margin-bottom: 0.3rem; line-height: 1.8; }
+
+  .post-content strong { color: var(--text); font-weight: 500; }
+  .post-content em { color: var(--amber); font-style: italic; }
+
+  .post-content blockquote {
+    border-left: 2px solid var(--green);
+    padding: 0.75rem 1.25rem;
+    margin: 1.5rem 0;
+    background: var(--green-dim);
+    border-radius: 0 4px 4px 0;
+    color: var(--text2);
+    font-style: italic;
+  }
+  .post-content blockquote p { margin-bottom: 0; color: var(--text2); }
+
+  .post-content code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    color: var(--green);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .post-content pre {
+    background: var(--bg2) !important;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+  .post-content pre code {
+    font-size: 13px;
+    color: var(--text);
+    background: none;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  .post-content pre .lang-label {
+    position: absolute;
+    top: 0.5rem; right: 0.75rem;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .post-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  .post-content img {
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 13px;
+  }
+  .post-content th {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .post-content td {
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    color: var(--text2);
+  }
+  .post-content tr:nth-child(even) td { background: var(--bg2); }
+
+  /* NAV FOOTER */
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .post-nav a {
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .post-nav a:hover { color: var(--green); }
+
+  /* ERROR / LOADING */
+  .state-msg {
+    padding: 6rem 0;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  footer a { color: var(--text2); text-decoration: none; }
+  footer a:hover { color: var(--green); }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .container { padding: 0 1.2rem; }
+    .nav-burger { display: flex; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 56px; left: 0; right: 0;
+      background: rgba(10,14,19,0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      padding: 1rem 2rem 1.5rem;
+      gap: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo"><span>~/</span>gg</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="../index.html#skills" onclick="closeNav()">skills</a></li>
+    <li><a href="../index.html#cv" onclick="closeNav()">cv</a></li>
+    <li><a href="../index.html#projects" onclick="closeNav()">projects</a></li>
+    <li><a href="../index.html#passions" onclick="closeNav()">passions</a></li>
+    <li><a href="../index.html#contact" onclick="closeNav()">contact</a></li>
+    <li><a href="index.html" class="active" onclick="closeNav()">blog</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main id="main">
+  <div class="container">
+    <div class="state-msg" id="status">Loading post...</div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <a href="index.html">← all posts</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  function toggleNav() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  function closeNav() {
+    document.getElementById('nav-links').classList.remove('open');
+  }
+
+  // Parse YAML-ish frontmatter: --- key: value ---
+  function parseFrontmatter(raw) {
+    const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+    if (!match) return { meta: {}, body: raw };
+    const meta = {};
+    match[1].split('\n').forEach(line => {
+      const idx = line.indexOf(':');
+      if (idx === -1) return;
+      const key = line.slice(0, idx).trim();
+      let val = line.slice(idx + 1).trim();
+      // Parse arrays: [a, b, c]
+      if (val.startsWith('[') && val.endsWith(']')) {
+        val = val.slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+      }
+      meta[key] = val;
+    });
+    return { meta, body: match[2] };
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  marked.setOptions({
+    breaks: false,
+    gfm: true,
+  });
+
+  // Custom renderer to add lang label and run highlight.js on code blocks
+  const renderer = new marked.Renderer();
+  renderer.code = function({ text, lang }) {
+    const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
+    const highlighted = hljs.highlight(text, { language }).value;
+    const label = lang ? `<span class="lang-label">${lang}</span>` : '';
+    return `<pre>${label}<code class="hljs language-${language}">${highlighted}</code></pre>`;
+  };
+  marked.use({ renderer });
+
+  async function loadPost() {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    const main = document.getElementById('main');
+    const status = document.getElementById('status');
+
+    if (!slug) {
+      status.textContent = 'No post specified.';
+      return;
+    }
+
+    try {
+      const res = await fetch(`posts/${slug}.md`);
+      if (!res.ok) throw new Error(`Post not found (${res.status})`);
+      const raw = await res.text();
+      const { meta, body } = parseFrontmatter(raw);
+
+      document.title = (meta.title || slug) + ' — Gonçalo Gomes';
+
+      const tags = Array.isArray(meta.tags) ? meta.tags : [];
+      const tagsHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+      main.innerHTML = `
+        <div class="container">
+          <header class="post-header">
+            <div class="terminal-line">
+              <span class="prompt-sym">❯</span>
+              <span class="prompt-path">~/blog/posts</span>
+              <span class="prompt-cmd">cat ${slug}.md</span>
+            </div>
+            <h1 class="post-title">${meta.title || slug}</h1>
+            <div class="post-meta-bar">
+              ${meta.date ? `<span class="post-date">${formatDate(meta.date)}</span>` : ''}
+              ${tagsHTML ? `<div class="post-tags">${tagsHTML}</div>` : ''}
+            </div>
+          </header>
+          <article class="post-content" id="post-content"></article>
+          <div class="post-nav">
+            <a href="index.html">← all posts</a>
+            <a href="../index.html">portfolio</a>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('post-content').innerHTML = marked.parse(body);
+    } catch (err) {
+      main.innerHTML = `<div class="container"><div class="state-msg">Could not load post: ${err.message}</div></div>`;
+      console.error(err);
+    }
+  }
+
+  loadPost();
+</script>
+</body>
+</html>

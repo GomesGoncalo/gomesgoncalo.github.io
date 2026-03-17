@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Gonçalo Gomes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e13;
+    --bg2: #0f141b;
+    --bg3: #141b24;
+    --surface: #1a2230;
+    --border: #1e2d3d;
+    --border2: #263545;
+    --green: #00ff88;
+    --green2: #00cc6a;
+    --green-dim: rgba(0,255,136,0.08);
+    --green-glow: rgba(0,255,136,0.15);
+    --blue: #4db8ff;
+    --amber: #ffb347;
+    --red: #ff5f57;
+    --text: #e2e8f0;
+    --text2: #8899aa;
+    --text3: #4d6070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  ::selection { background: var(--green-glow); color: var(--green); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,14,19,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--text3); }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 12px;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::before { content: '# '; color: var(--green); opacity: 0; transition: opacity 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::before { opacity: 1; }
+  .nav-links a.active { color: var(--green); }
+  .nav-links a.active::before { opacity: 1; }
+
+  .nav-burger {
+    display: none;
+    flex-direction: column; gap: 5px; cursor: pointer;
+    background: none; border: none; padding: 4px;
+  }
+  .nav-burger span {
+    display: block; width: 20px; height: 1.5px;
+    background: var(--text2); border-radius: 1px; transition: all 0.2s;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  /* PAGE HEADER */
+  .page-header {
+    padding: 7rem 0 3rem;
+  }
+
+  .terminal-line {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 12px; color: var(--text3); margin-bottom: 1.5rem;
+  }
+  .prompt-sym { color: var(--green); }
+  .prompt-path { color: var(--blue); }
+  .prompt-cmd { color: var(--text2); }
+
+  .page-title {
+    font-family: var(--sans);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+  .page-title .accent { color: var(--green); }
+
+  .page-subtitle {
+    color: var(--text2);
+    font-size: 14px;
+    max-width: 480px;
+  }
+
+  /* FILTERS */
+  .blog-controls {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 2rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .blog-count {
+    font-size: 12px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+
+  /* POST LIST */
+  .post-list { display: flex; flex-direction: column; gap: 0; }
+
+  .post-entry {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0 2rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s;
+    border-radius: 4px;
+    position: relative;
+  }
+  .post-entry::before {
+    content: '';
+    position: absolute;
+    left: -1rem; top: 0; bottom: 0; width: 2px;
+    background: var(--green);
+    transform: scaleY(0);
+    transition: transform 0.2s;
+    border-radius: 1px;
+  }
+  .post-entry:hover::before { transform: scaleY(1); }
+  .post-entry:hover .post-title { color: var(--green); }
+
+  .post-meta { display: flex; flex-direction: column; gap: 0.4rem; padding-top: 0.25rem; }
+  .post-date { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; }
+  .post-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-size: 10px;
+    color: var(--green2);
+    background: var(--green-dim);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 3px;
+    padding: 1px 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .post-body {}
+  .post-title {
+    font-family: var(--sans);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    transition: color 0.2s;
+  }
+  .post-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 4rem 0;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  /* LOADING */
+  .loading {
+    padding: 4rem 0;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+  .loading::after {
+    content: '';
+    animation: dots 1.2s infinite;
+  }
+  @keyframes dots {
+    0%   { content: ''; }
+    33%  { content: '.'; }
+    66%  { content: '..'; }
+    100% { content: '...'; }
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  footer a { color: var(--text2); text-decoration: none; }
+  footer a:hover { color: var(--green); }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .container { padding: 0 1.2rem; }
+    .nav-burger { display: flex; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 56px; left: 0; right: 0;
+      background: rgba(10,14,19,0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      padding: 1rem 2rem 1.5rem;
+      gap: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+    .post-entry { grid-template-columns: 1fr; gap: 0.5rem; }
+    .post-meta { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo"><span>~/</span>gg</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="../index.html#skills" onclick="closeNav()">skills</a></li>
+    <li><a href="../index.html#cv" onclick="closeNav()">cv</a></li>
+    <li><a href="../index.html#projects" onclick="closeNav()">projects</a></li>
+    <li><a href="../index.html#passions" onclick="closeNav()">passions</a></li>
+    <li><a href="../index.html#contact" onclick="closeNav()">contact</a></li>
+    <li><a href="index.html" class="active" onclick="closeNav()">blog</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main>
+  <div class="container">
+    <header class="page-header">
+      <div class="terminal-line">
+        <span class="prompt-sym">❯</span>
+        <span class="prompt-path">~/blog</span>
+        <span class="prompt-cmd">ls -lt posts/</span>
+      </div>
+      <h1 class="page-title">The <span class="accent">Blog</span></h1>
+      <p class="page-subtitle">Notes on systems, software, and the occasional rabbit hole.</p>
+    </header>
+
+    <div class="blog-controls">
+      <span class="blog-count" id="post-count"></span>
+    </div>
+
+    <div class="post-list" id="post-list">
+      <div class="loading">Loading posts</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <a href="../index.html">← back to portfolio</a>
+  </div>
+</footer>
+
+<script>
+  function toggleNav() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  function closeNav() {
+    document.getElementById('nav-links').classList.remove('open');
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  async function loadPosts() {
+    const list = document.getElementById('post-list');
+    const countEl = document.getElementById('post-count');
+    try {
+      const res = await fetch('posts.json');
+      if (!res.ok) throw new Error('Failed to load posts');
+      const posts = await res.json();
+
+      countEl.textContent = posts.length + ' post' + (posts.length !== 1 ? 's' : '');
+
+      if (posts.length === 0) {
+        list.innerHTML = '<div class="empty-state">No posts yet. Check back soon.</div>';
+        return;
+      }
+
+      list.innerHTML = posts.map(p => `
+        <a class="post-entry" href="post.html?slug=${encodeURIComponent(p.slug)}">
+          <div class="post-meta">
+            <span class="post-date">${formatDate(p.date)}</span>
+            <div class="post-tags">
+              ${(p.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+            </div>
+          </div>
+          <div class="post-body">
+            <div class="post-title">${p.title}</div>
+            <div class="post-desc">${p.description || ''}</div>
+          </div>
+        </a>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Could not load posts.</div>';
+      console.error(err);
+    }
+  }
+
+  loadPosts();
+</script>
+</body>
+</html>

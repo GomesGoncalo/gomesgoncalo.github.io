@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gonçalo Gomes — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e13;
+    --bg2: #0f141b;
+    --bg3: #141b24;
+    --surface: #1a2230;
+    --border: #1e2d3d;
+    --border2: #263545;
+    --green: #00ff88;
+    --green2: #00cc6a;
+    --green-dim: rgba(0,255,136,0.08);
+    --green-glow: rgba(0,255,136,0.15);
+    --blue: #4db8ff;
+    --amber: #ffb347;
+    --red: #ff5f57;
+    --text: #e2e8f0;
+    --text2: #8899aa;
+    --text3: #4d6070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* SELECTION */
+  ::selection { background: var(--green-glow); color: var(--green); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,14,19,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--text3); }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 12px;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::before {
+    content: '# ';
+    color: var(--green);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::before { opacity: 1; }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  section { padding: 5rem 0; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 3rem;
+  }
+  .section-header h2 {
+    font-family: var(--sans);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .section-header .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border2), transparent);
+  }
+  .section-label {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    padding-top: 8rem;
+    padding-bottom: 5rem;
+    min-height: 100vh;
+    display: flex; align-items: center;
+  }
+
+  .hero-inner { width: 100%; }
+
+  .hero-pre {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .hero-pre span { color: var(--green); }
+
+  .hero-name {
+    font-family: var(--sans);
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .hero-name .accent { color: var(--green); }
+
+  .hero-location {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+  }
+
+  .hero-title {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--text2);
+    margin-bottom: 2rem;
+  }
+  .hero-title .cursor {
+    display: inline-block;
+    width: 2px; height: 1.1em;
+    background: var(--green);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .hero-bio {
+    max-width: 520px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--green);
+    color: var(--bg);
+    font-weight: 700;
+    border: 1px solid var(--green);
+  }
+  .btn-primary:hover { background: var(--green2); border-color: var(--green2); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text2); }
+
+  .hero-stats {
+    display: flex; gap: 2.5rem; margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .stat-num {
+    font-family: var(--sans);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--green);
+    display: block;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  /* TERMINAL PROMPT EFFECT */
+  .terminal-line {
+    display: flex; align-items: baseline; gap: 0.5rem;
+    font-size: 12px; color: var(--text3); margin-bottom: 0.5rem;
+  }
+  .prompt-sym { color: var(--green); }
+  .prompt-path { color: var(--blue); }
+  .prompt-cmd { color: var(--text2); }
+
+  /* ── SKILLS (formerly About) ── */
+  #skills { background: var(--bg); }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .skill-card {
+    background: var(--bg2);
+    padding: 1.5rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .skill-card:hover { background: var(--bg3); }
+  .skill-card:hover::before { opacity: 1; }
+
+  .skill-card-label {
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .skill-card h3 {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .tags {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .tag {
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 8px;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+  .tag:hover {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .tag.highlight {
+    color: var(--green);
+    background: var(--green-dim);
+    border-color: rgba(0,255,136,0.3);
+  }
+
+  /* ── CV / RESUME ── */
+  #cv { background: var(--bg); }
+
+  .cv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+
+  @media (max-width: 640px) { .cv-grid { grid-template-columns: 1fr; } }
+
+  .cv-col h3 {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .cv-entry {
+    position: relative;
+    padding-left: 1.2rem;
+    margin-bottom: 2rem;
+    border-left: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .cv-entry:hover { border-color: var(--green); }
+  .cv-entry::before {
+    content: '';
+    position: absolute;
+    left: -4px; top: 6px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border2);
+    border: 1px solid var(--border2);
+    transition: all 0.2s;
+  }
+  .cv-entry:hover::before {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .cv-date {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.2rem;
+  }
+  .cv-title {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.1rem;
+  }
+  .cv-org {
+    font-size: 12px;
+    color: var(--blue);
+    margin-bottom: 0.5rem;
+  }
+  .cv-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+  .cv-desc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .cv-desc ul li::before {
+    content: '→ ';
+    color: var(--green);
+    font-size: 11px;
+  }
+
+  /* Download CV button */
+  .cv-download-row {
+    margin-top: 2.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+
+  /* ── PROJECTS ── */
+  #projects { background: var(--bg); }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .project-card {
+    background: var(--bg2);
+    padding: 1.5rem;
+    display: flex; flex-direction: column;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .project-card:hover { background: var(--bg3); }
+  .project-card:hover::after { transform: scaleX(1); }
+
+  .project-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .project-icon {
+    font-size: 20px; color: var(--green);
+    font-family: var(--mono);
+    opacity: 0.7;
+  }
+  .project-links { display: flex; gap: 0.5rem; }
+  .project-link {
+    font-size: 12px; color: var(--text3);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 8px;
+    transition: all 0.15s;
+  }
+  .project-link:hover {
+    color: var(--green);
+    border-color: var(--green);
+  }
+  .project-name {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .project-desc {
+    font-size: 13px; color: var(--text2);
+    line-height: 1.65; flex: 1;
+    margin-bottom: 1rem;
+  }
+  .project-status {
+    font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+  .project-status::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .status-active { color: var(--green); }
+  .status-active::before { background: var(--green); animation: pulse 2s infinite; }
+  .status-wip { color: var(--amber); }
+  .status-wip::before { background: var(--amber); }
+  @keyframes pulse {
+    0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,0.4)}
+    50%{box-shadow:0 0 0 4px rgba(0,255,136,0)}
+  }
+
+  /* ── BLOG ── */
+  #blog { background: var(--bg); }
+
+  .blog-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+  .blog-entry {
+    background: var(--bg2);
+    padding: 1.5rem;
+    display: flex; align-items: baseline; gap: 2rem;
+    transition: background 0.2s;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .blog-entry:hover { background: var(--bg3); }
+  .blog-date {
+    font-size: 11px; color: var(--text3);
+    letter-spacing: 0.05em; white-space: nowrap; min-width: 80px;
+  }
+  .blog-content { flex: 1; }
+  .blog-title {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 600; color: var(--text);
+    margin-bottom: 0.25rem;
+    transition: color 0.2s;
+  }
+  .blog-entry:hover .blog-title { color: var(--green); }
+  .blog-excerpt { font-size: 12px; color: var(--text2); }
+  .blog-tag {
+    font-size: 10px; color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 3px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* ── CONTACT ── */
+  #contact {
+    background: var(--bg);
+    text-align: center;
+  }
+  .contact-inner {
+    max-width: 560px; margin: 0 auto;
+  }
+  .contact-big {
+    font-family: var(--sans);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+  .contact-big span { color: var(--green); }
+  .contact-sub {
+    font-size: 14px; color: var(--text2);
+    margin-bottom: 2.5rem; line-height: 1.7;
+  }
+  .contact-links {
+    display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+
+  .social-row {
+    display: flex; justify-content: center;
+    gap: 1.5rem; flex-wrap: wrap;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .social-link {
+    font-size: 12px; color: var(--text3);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .social-link:hover { color: var(--green); }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  footer p { font-size: 11px; color: var(--text3); }
+  footer span { color: var(--green); }
+
+  /* PDF RENDER CONTAINER — isolated off-screen div, not body */
+  .pdf-container {
+    --bg: #ffffff;
+    --bg2: #f8f9fa;
+    --bg3: #f1f3f5;
+    --surface: #e9ecef;
+    --border: #dee2e6;
+    --border2: #ced4da;
+    --green: #087f5b;
+    --green2: #0b7953;
+    --green-dim: rgba(8,127,91,0.08);
+    --green-glow: rgba(8,127,91,0.12);
+    --blue: #1971c2;
+    --amber: #e67700;
+    --text: #212529;
+    --text2: #495057;
+    --text3: #6c757d;
+    background: #fff;
+    color: #212529;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .pdf-container *, .pdf-container *::before, .pdf-container *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pdf-container section { padding: 1.2rem 0; }
+  .pdf-container #hero { min-height: unset; padding-top: 0.5rem; }
+  .pdf-container .hero-stats { margin-top: 1.2rem; padding-top: 0.8rem; }
+  .pdf-container .fade-in { opacity: 1 !important; transform: none !important; }
+  .pdf-container .skills-grid { grid-template-columns: repeat(2, 1fr); }
+  .pdf-container .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  .pdf-container .cv-grid { grid-template-columns: 1fr 1fr; }
+  .pdf-container a { color: inherit !important; text-decoration: none !important; }
+  .pdf-container .cv-entry,
+  .pdf-container .skill-card,
+  .pdf-container .project-card,
+  .pdf-container .oss-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .pdf-container .section-header { break-after: avoid; page-break-after: avoid; }
+
+  /* SCANLINES EFFECT (subtle) */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.015) 2px,
+      rgba(0,0,0,0.015) 4px
+    );
+    z-index: 9999;
+  }
+
+  /* SCROLL FADE IN */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* HAMBURGER */
+  .nav-burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .nav-burger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text2);
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-burger.open span:nth-child(2) { opacity: 0; }
+  .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* OSS LIST */
+  .oss-list {
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .oss-list-label {
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .oss-items { display: flex; flex-direction: column; }
+  .oss-item {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.65rem 1.25rem;
+    background: var(--bg2);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .oss-item:last-child { border-bottom: none; }
+  .oss-item:hover { background: var(--bg3); }
+  .oss-name {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    min-width: 90px;
+  }
+  .oss-item:hover .oss-name { color: var(--green); }
+  .oss-desc { font-size: 12px; color: var(--text2); flex: 1; }
+  .oss-lang {
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+
+  /* PASSIONS */
+  .passions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .passion-card {
+    background: var(--bg2);
+    padding: 1.75rem 1.5rem;
+    transition: background 0.2s;
+  }
+  .passion-card:hover { background: var(--bg3); }
+  .passion-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .passion-name {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .passion-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  /* BACK TO TOP */
+  .back-to-top {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 200;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 0.5rem 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-to-top:hover { color: var(--green); border-color: var(--green); }
+  .back-to-top.visible { display: block; }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .container { padding: 0 1.2rem; }
+    section { padding: 3.5rem 0; }
+    .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+    .nav-burger { display: flex; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 56px; left: 0; right: 0;
+      background: rgba(10,14,19,0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      padding: 1rem 2rem 1.5rem;
+      gap: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><span>~/</span>gg</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#skills" onclick="closeNav()">skills</a></li>
+    <li><a href="#cv" onclick="closeNav()">cv</a></li>
+    <li><a href="#projects" onclick="closeNav()">projects</a></li>
+    <li><a href="#passions" onclick="closeNav()">passions</a></li>
+    <li><a href="#contact" onclick="closeNav()">contact</a></li>
+    <li><a href="blog/index.html" onclick="closeNav()">blog</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="terminal-line">
+        <span class="prompt-sym">❯</span>
+        <span class="prompt-path">~/portfolio</span>
+        <span class="prompt-cmd">whoami</span>
+      </div>
+      <div class="hero-pre">Hello, World. I'm <span>available for opportunities.</span></div>
+      <h1 class="hero-name">Gonçalo<br><span class="accent">Gomes</span></h1>
+      <p class="hero-location">📍 London, UK</p>
+      <p class="hero-title">Software Engineer<span class="cursor"></span></p>
+      <p class="hero-bio">
+        Software engineer with 10+ years building systems software — networking stacks, embedded middleware, and graphics. I like architecture problems: getting the design right, then seeing it through to something that ships to real users.
+      </p>
+      <div class="hero-links">
+        <a href="#contact" class="btn btn-primary">Get in touch →</a>
+        <a href="https://github.com/GomesGoncalo" target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
+        <a href="https://www.linkedin.com/in/goncalomvgomes/" target="_blank" rel="noopener" class="btn btn-ghost">LinkedIn</a>
+        <a href="#cv" class="btn btn-ghost">View CV</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <span class="stat-num">10+</span>
+          <div class="stat-label">Years experience</div>
+        </div>
+        <div>
+          <span class="stat-num">7+</span>
+          <div class="stat-label">OSS projects contributed</div>
+        </div>
+        <div>
+          <span class="stat-num">∞</span>
+          <div class="stat-label">Coffee consumed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>Skills &amp; Stack</h2>
+      <div class="line"></div>
+    </div>
+    <div class="skills-grid fade-in">
+      <div class="skill-card">
+        <div class="skill-card-label">// languages</div>
+        <h3>Languages</h3>
+        <div class="tags">
+          <span class="tag highlight">C</span>
+          <span class="tag highlight">C++</span>
+          <span class="tag highlight">Rust</span>
+          <span class="tag">Python</span>
+          <span class="tag">Bash</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-label">// protocols</div>
+        <h3>Protocols &amp; Networking</h3>
+        <div class="tags">
+          <span class="tag highlight">TLS</span>
+          <span class="tag highlight">Mesh networking</span>
+          <span class="tag">AODV</span>
+          <span class="tag">SIP</span>
+          <span class="tag">RTP/RTCP</span>
+          <span class="tag">Unix IPC</span>
+          <span class="tag">Wi-Fi/802.11</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-label">// systems</div>
+        <h3>Systems &amp; Platforms</h3>
+        <div class="tags">
+          <span class="tag highlight">Linux</span>
+          <span class="tag highlight">Wayland</span>
+          <span class="tag">EGL/GLES2</span>
+          <span class="tag">Skia</span>
+          <span class="tag">Embedded systems</span>
+          <span class="tag">Set-top box middleware</span>
+          <span class="tag">Wireless mesh</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-label">// tooling</div>
+        <h3>Dev &amp; Debugging</h3>
+        <div class="tags">
+          <span class="tag highlight">GDB</span>
+          <span class="tag highlight">Wireshark</span>
+          <span class="tag">Cargo</span>
+          <span class="tag">Strace</span>
+          <span class="tag">Jupyter</span>
+          <span class="tag">Git</span>
+          <span class="tag">CI/CD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CV -->
+<section id="cv">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>CV / Résumé</h2>
+      <div class="line"></div>
+    </div>
+    <div class="cv-grid fade-in">
+      <div class="cv-col">
+        <h3>// experience</h3>
+
+        <div class="cv-entry">
+          <div class="cv-date">Jan 2022 — present</div>
+          <div class="cv-title">Senior Software Engineer (C/C++17)</div>
+          <div class="cv-org">YouView TV Ltd · London, UK</div>
+          <div class="cv-desc"><ul>
+            <li>Added TLS session resumption to glib-networking, cutting app startup by 60%; supported both GnuTLS and OpenSSL backends</li>
+            <li>Replaced DirectFB with Skia on Wayland, unblocking further platform development</li>
+            <li>Refactored performance-critical and unsafe code across the middleware codebase</li>
+            <li>Moved app verification from a local signed descriptor to a cloud-based launch flow</li>
+            <li>Ran hiring workshops, interviewed candidates, and mentored graduate engineers</li>
+          </ul></div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-date">May 2018 — Jan 2022</div>
+          <div class="cv-title">Software Engineer → Senior Software Engineer (C)</div>
+          <div class="cv-org">AirTies Wireless Networks · London, UK</div>
+          <div class="cv-desc"><ul>
+            <li>Integrated AODV-based mesh solution for Sky Plc; improved routing throughput by ~15%</li>
+            <li>Implemented client steering to guide stations to optimal access points</li>
+            <li>Modelled network quality from customer data to drive down call-centre costs</li>
+            <li>Promoted to Senior for consistently exceptional performance</li>
+            <li>Led a team of 4 engineers to deliver Dynamic Frequency Selection (DFS), improving coverage and throughput</li>
+            <li>Designed back-haul prioritisation deployed to ~30M managed households (Sky, AT&amp;T, Altice, and others)</li>
+            <li>Built dashboards and scripts to correlate network metrics with streaming data using AirTies &amp; Sky APIs</li>
+          </ul></div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-date">Sep 2015 — May 2018</div>
+          <div class="cv-title">Software Engineer (C/C++11)</div>
+          <div class="cv-org">WIT Software · Coimbra, PT &amp; Mumbai, India</div>
+          <div class="cv-desc"><ul>
+            <li>Implemented SIP/RCS stack for Reliance Jio as per GSMA specifications</li>
+            <li>Engineered a Back-to-Back User Agent for Home Gateways</li>
+            <li>Ran the project end-to-end as sole owner — requirements, architecture, implementation, and client liaison</li>
+            <li>Product set a world record: 16M subscribers in month one, 120M+ within six months</li>
+          </ul></div>
+        </div>
+      </div>
+
+      <div class="cv-col">
+        <h3>// education</h3>
+
+        <div class="cv-entry">
+          <div class="cv-date">2010 — 2015</div>
+          <div class="cv-title">MSc in Electronic &amp; Telecommunications Engineering</div>
+          <div class="cv-org">University of Aveiro · Portugal</div>
+        </div>
+
+        <h3 style="margin-top: 2rem">// certifications</h3>
+
+        <div class="cv-entry">
+          <div class="cv-date">2019</div>
+          <div class="cv-title">Data Science</div>
+          <div class="cv-org">HarvardX</div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-date">2019</div>
+          <div class="cv-title">Agile Project Management</div>
+          <div class="cv-org">University of Maryland</div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-date">2015</div>
+          <div class="cv-title">R Programming</div>
+          <div class="cv-org">Johns Hopkins University</div>
+        </div>
+
+        <h3 style="margin-top: 2rem">// awards</h3>
+
+        <div class="cv-entry">
+          <div class="cv-date">2019</div>
+          <div class="cv-title">AirTiesStar Award</div>
+          <div class="cv-org">AirTies UK</div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-date">2015</div>
+          <div class="cv-title">Rookie Award</div>
+          <div class="cv-org">WIT Software</div>
+        </div>
+      </div>
+    </div>
+    <div class="cv-download-row fade-in">
+      <a href="#" id="download-pdf" class="btn btn-ghost">↓ Download PDF</a>
+      <span style="font-size:12px;color:var(--text3)">Last updated · 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>Projects</h2>
+      <div class="line"></div>
+    </div>
+    <div class="projects-grid fade-in">
+
+      <div class="project-card">
+        <div class="project-top">
+          <span class="project-icon">{/}</span>
+          <div class="project-links">
+            <a href="https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/221" target="_blank" class="project-link">MR ↗</a>
+          </div>
+        </div>
+        <div class="project-status status-active">Merged</div>
+        <div class="project-name">glib-networking — TLS Resumption</div>
+        <div class="project-desc">TLS session resumption was missing from the library. Added it for both GnuTLS and OpenSSL backends, cut app startup by 60%, and fixed a flaky test in CI while at it.</div>
+        <div class="tags">
+          <span class="tag">C</span>
+          <span class="tag">TLS</span>
+          <span class="tag">Open Source</span>
+          <span class="tag">GNOME</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-top">
+          <span class="project-icon">[*]</span>
+          <div class="project-links">
+            <a href="https://github.com/rustls/rustls/pull/1730" target="_blank" class="project-link">PR ↗</a>
+          </div>
+        </div>
+        <div class="project-status status-active">Merged</div>
+        <div class="project-name">rustls — Randomize ClientHello</div>
+        <div class="project-desc">TLS clients can be fingerprinted by the order of extensions in their ClientHello. This PR randomises that order in rustls, making clients harder to identify without breaking session continuity.</div>
+        <div class="tags">
+          <span class="tag">Rust</span>
+          <span class="tag">TLS</span>
+          <span class="tag">Security</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-top">
+          <span class="project-icon">[~]</span>
+          <div class="project-links">
+            <a href="https://github.com/nushell/nushell/pull/10356" target="_blank" class="project-link">PR ↗</a>
+          </div>
+        </div>
+        <div class="project-status status-active">Merged</div>
+        <div class="project-name">nushell — JSON list requests</div>
+        <div class="project-desc">HTTP POST in nushell only accepted JSON objects, not arrays. Fixed the type handling so lists work too.</div>
+        <div class="tags">
+          <span class="tag">Rust</span>
+          <span class="tag">nushell</span>
+          <span class="tag">HTTP</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-top">
+          <span class="project-icon">{/}</span>
+          <div class="project-links">
+            <a href="https://github.com/uutils/coreutils/pull/10232" target="_blank" class="project-link">PR ↗</a>
+          </div>
+        </div>
+        <div class="project-status status-active">Merged</div>
+        <div class="project-name">uutils/coreutils — rm symlink fix</div>
+        <div class="project-desc"><code style="font-size:11px;color:var(--green)">rm -i</code> was prompting "write-protected" for symlinks pointing at read-only targets — wrong, GNU rm doesn't do this. Fixed the metadata check, cut a redundant FS call, and added a regression test.</div>
+        <div class="tags">
+          <span class="tag">Rust</span>
+          <span class="tag">coreutils</span>
+          <span class="tag">Open Source</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-top">
+          <span class="project-icon">&gt;_&lt;</span>
+          <div class="project-links">
+            <a href="https://github.com/GomesGoncalo/discord-overlay" target="_blank" class="project-link">GH ↗</a>
+          </div>
+        </div>
+        <div class="project-status status-active">Active</div>
+        <div class="project-name">discord-overlay</div>
+        <div class="project-desc">Needed a voice channel overlay for Hyprland that wasn't Electron. Built one in Rust using EGL/GLES2 and the Wayland layer-shell protocol — shows participants, speaking status, and mute/deafen controls.</div>
+        <div class="tags">
+          <span class="tag">Rust</span>
+          <span class="tag">Wayland</span>
+          <span class="tag">EGL/GLES2</span>
+          <span class="tag">Discord IPC</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="oss-list fade-in">
+      <div class="oss-list-label">// other contributions</div>
+      <div class="oss-items">
+        <a href="https://github.com/GomesGoncalo" target="_blank" class="oss-item">
+          <span class="oss-name">saf</span>
+          <span class="oss-desc">Schedule Aware Future — C++ async library</span>
+          <span class="oss-lang">C++</span>
+        </a>
+        <a href="https://github.com/wesnoth/wesnoth" target="_blank" class="oss-item">
+          <span class="oss-name">Wesnoth</span>
+          <span class="oss-desc">Open source turn-based strategy game</span>
+          <span class="oss-lang">C++</span>
+        </a>
+        <a href="https://github.com/nedrysoft/pingnoo" target="_blank" class="oss-item">
+          <span class="oss-name">Pingnoo</span>
+          <span class="oss-desc">Network latency analyser</span>
+          <span class="oss-lang">C++</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PASSIONS -->
+<section id="passions">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>Beyond the Terminal</h2>
+      <div class="line"></div>
+    </div>
+    <div class="passions-grid fade-in">
+      <div class="passion-card">
+        <div class="passion-icon">📷</div>
+        <div class="passion-name">Photography</div>
+        <div class="passion-desc">Capturing light and moments.</div>
+      </div>
+      <div class="passion-card">
+        <div class="passion-icon">🎺</div>
+        <div class="passion-name">Trumpet</div>
+        <div class="passion-desc">Taught trumpet at Chãs Philharmonic School, Leiria (2009–2011).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner fade-in">
+      <div class="section-label">// get in touch</div>
+      <h2 class="contact-big">Let's build something <span>great</span>.</h2>
+      <p class="contact-sub">
+        Whether it's a new opportunity, an interesting open source project, or just a chat about systems engineering — my inbox is open.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:gomesgoncalo@gmail.com" class="btn btn-primary">Send an email →</a>
+        <a href="https://www.linkedin.com/in/goncalomvgomes/" target="_blank" rel="noopener" class="btn btn-ghost">LinkedIn</a>
+      </div>
+      <div class="social-row">
+        <a href="https://github.com/GomesGoncalo" target="_blank" rel="noopener" class="social-link">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GomesGoncalo
+        </a>
+        <a href="https://www.linkedin.com/in/goncalomvgomes/" target="_blank" rel="noopener" class="social-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          goncalomvgomes
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ top</button>
+
+<!-- FOOTER -->
+<footer>
+  <p>Designed &amp; Built by <span>Gonçalo Gomes</span> · <span>2026</span></p>
+</footer>
+
+<script>
+  // Fade-in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Typewriter effect for hero title
+  const titles = [
+    'Software Engineer',
+    'Systems Programmer',
+    'Open Source Contributor',
+    'Wayland / Graphics Engineer',
+    'Networking Specialist',
+  ];
+  let ti = 0, ci = 0, deleting = false;
+  const titleEl = document.querySelector('.hero-title');
+
+  function type() {
+    const current = titles[ti];
+    if (deleting) {
+      ci--;
+    } else {
+      ci++;
+    }
+
+    titleEl.innerHTML = current.slice(0, ci) + '<span class="cursor"></span>';
+
+    if (!deleting && ci === current.length) {
+      setTimeout(() => { deleting = true; type(); }, 2200);
+      return;
+    }
+    if (deleting && ci === 0) {
+      deleting = false;
+      ti = (ti + 1) % titles.length;
+    }
+
+    setTimeout(type, deleting ? 40 : 80);
+  }
+
+  setTimeout(type, 1200);
+
+  // Back to top (mobile)
+  const backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', window.scrollY > 300);
+  });
+
+  // Mobile nav
+  function toggleNav() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('nav-burger').classList.toggle('open');
+  }
+  function closeNav() {
+    document.getElementById('nav-links').classList.remove('open');
+    document.getElementById('nav-burger').classList.remove('open');
+  }
+
+  // PDF generation — build content with jsPDF directly (no html2canvas)
+  document.getElementById('download-pdf').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const btn = this;
+
+    const jsPDF = window.jspdf && window.jspdf.jsPDF;
+    if (!jsPDF) {
+      alert('PDF library failed to load. Check your internet connection and try again.');
+      return;
+    }
+
+    btn.textContent = '⏳ Generating…';
+    btn.disabled = true;
+
+    try {
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+      doc.setProperties({
+        title:   'Gonçalo Gomes — CV',
+        author:  'Gonçalo Gomes',
+        subject: 'Software Engineer CV',
+        keywords: 'C, C++, Rust, Linux, Wayland, networking, embedded',
+        creator:  'cv.html',
+      });
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+
+      // ── Layout ───────────────────────────────────────────
+      const ml = 14, mr = 13, mt = 13, mb = 12;
+      const lw = 116, gutter = 6;
+      const rx = ml + lw + gutter;
+      const rw = W - rx - mr;
+      let yL = mt, yR = mt;
+
+      // ── Colours ──────────────────────────────────────────
+      const dark  = [33,  37,  41];
+      const mid   = [73,  80,  87];
+      const gray  = [108, 117, 125];
+      const lgray = [189, 195, 199];
+      const green = [8,   127, 91];
+      const blue  = [25,  113, 194];
+
+      // ── Primitives ───────────────────────────────────────
+      function write(side, str, size, style, color, indent = 0) {
+        const x = (side === 'L' ? ml : rx) + indent;
+        const w = (side === 'L' ? lw : rw) - indent;
+        doc.setFontSize(size); doc.setFont('helvetica', style); doc.setTextColor(...color);
+        const lines = doc.splitTextToSize(str, w);
+        const h = lines.length * size * 0.41;
+        if (side === 'L') {
+          if (yL + h > H - mb - 8) { doc.addPage(); yL = mt; yR = mt; }
+          doc.text(lines, x, yL); yL += h;
+        } else {
+          if (yR + h > H - mb - 8) { doc.addPage(); yL = mt; yR = mt; }
+          doc.text(lines, x, yR); yR += h;
+        }
+      }
+
+      function sp(side, n) { if (side === 'L') yL += n; else yR += n; }
+
+      function section(side, label) {
+        sp(side, 4.5);
+        write(side, label, 7, 'bold', green);
+        sp(side, 0.5);
+        const x1 = side === 'L' ? ml : rx, x2 = side === 'L' ? ml + lw : rx + rw;
+        doc.setDrawColor(...green); doc.setLineWidth(0.3);
+        doc.line(x1, side === 'L' ? yL : yR, x2, side === 'L' ? yL : yR);
+        sp(side, 4);
+      }
+
+      function expEntry(date, title, org, bullets, promotedFrom) {
+        const startY = yL;
+        const colRX  = ml + lw;
+
+        // Date right-aligned, title left — same baseline
+        doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...gray);
+        doc.text(date, colRX, yL, { align: 'right' });
+        doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark);
+        const titleLines = doc.splitTextToSize(title, lw - 28);
+        doc.text(titleLines, ml + 3, yL);
+        yL += titleLines.length * 9.5 * 0.41 + 0.5;
+
+        if (promotedFrom) {
+          write('L', '(promoted from ' + promotedFrom + ')', 7.5, 'italic', gray, 3);
+          sp('L', 0.3);
+        }
+        if (org) { sp('L', 0.5); write('L', org, 8.5, 'italic', blue, 3); }
+        if (bullets.length) {
+          sp('L', 1.5);
+          bullets.forEach(b => { write('L', '-  ' + b, 8.5, 'normal', mid, 5); sp('L', 0.4); });
+        }
+
+        // Green left accent bar
+        doc.setFillColor(...green);
+        doc.rect(ml, startY - 1, 1, yL - startY + 1, 'F');
+
+        // Thin separator before next entry
+        sp('L', 3);
+        doc.setDrawColor(...lgray); doc.setLineWidth(0.1);
+        doc.line(ml, yL, ml + lw, yL);
+        sp('L', 4); // needs to exceed 9.5pt title ascender (~2.3mm) plus visual gap
+      }
+
+      function rightEntry(date, title, org) {
+        const entryY = yR;
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...gray);
+        doc.text(date, rx + rw, entryY, { align: 'right' });
+        doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark);
+        const lines = doc.splitTextToSize(title, rw - 14);
+        doc.text(lines, rx, entryY);
+        yR += lines.length * 8.5 * 0.41 + 0.5;
+        if (org) { write('R', org, 8, 'italic', blue); sp('R', 0.5); }
+        sp('R', 2.5);
+      }
+
+      // ── DOM helpers ──────────────────────────────────────
+      const q   = s  => document.querySelector(s);
+      const txt = el => el ? el.textContent.trim().replace(/→/g, 'to') : '';
+      const iht = el => el
+        ? el.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+        : '';
+
+      // ── Header ───────────────────────────────────────────
+      const name     = iht(q('.hero-name'));
+      const location = txt(q('.hero-location')).replace('📍 ', '');
+
+      // Green accent bar
+      doc.setFillColor(...green);
+      doc.rect(ml, yL, 1.2, 10, 'F');
+
+      doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark);
+      doc.text(name, ml + 4, yL + 7.5);
+      yL += 11.5;
+
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...gray);
+      doc.text('Software Engineer  ·  ' + location, ml + 4, yL);
+      yL += 4.5;
+
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lgray);
+      const contacts = [
+        { label: 'gomesgoncalo@gmail.com',        url: 'mailto:gomesgoncalo@gmail.com' },
+        { label: 'github.com/GomesGoncalo',        url: 'https://github.com/GomesGoncalo' },
+        { label: 'linkedin.com/in/goncalomvgomes', url: 'https://www.linkedin.com/in/goncalomvgomes/' },
+      ];
+      const sep = '   ·   ';
+      let cx = ml + 4;
+      contacts.forEach((c, i) => {
+        if (i > 0) { doc.text(sep, cx, yL); cx += doc.getTextWidth(sep); }
+        doc.textWithLink(c.label, cx, yL, { url: c.url });
+        cx += doc.getTextWidth(c.label);
+      });
+      yL += 4;
+
+      // Skills summary from highlighted tags (deduplicated)
+      const highlights = [...new Set(
+        Array.from(document.querySelectorAll('.skill-card .tag.highlight')).map(t => txt(t))
+      )].slice(0, 8);
+      if (highlights.length) {
+        doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green);
+        doc.text(highlights.join('  ·  '), ml + 4, yL);
+        yL += 4;
+      }
+
+      doc.setDrawColor(...lgray); doc.setLineWidth(0.15);
+      doc.line(ml, yL, W - mr, yL);
+      yL += 6; yR = yL;
+      const colDividerStartY = yL; // draw divider after columns so it stops at shorter column
+
+      // ── Left: Experience ─────────────────────────────────
+      section('L', 'EXPERIENCE');
+      document.querySelectorAll('.cv-col')[0].querySelectorAll('.cv-entry').forEach(el => {
+        const raw      = txt(el.querySelector('.cv-title'));
+        const hasPromo = raw.includes(' to ');
+        expEntry(
+          txt(el.querySelector('.cv-date')),
+          hasPromo ? raw.split(' to ').pop().trim() : raw,
+          txt(el.querySelector('.cv-org')),
+          Array.from(el.querySelectorAll('.cv-desc li')).map(li => txt(li)), // no cap
+          hasPromo ? raw.split(' to ')[0].trim() : null,
+        );
+      });
+
+      // ── Left: Open Source ────────────────────────────────
+      section('L', 'OPEN SOURCE');
+      document.querySelectorAll('.project-card').forEach(card => {
+        const pname   = txt(card.querySelector('.project-name'));
+        const pdesc   = txt(card.querySelector('.project-desc'));
+        const pstatus = txt(card.querySelector('.project-status'));
+
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+        const sw = pstatus ? doc.getTextWidth(pstatus) + 2 : 0;
+
+        doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark);
+        const nameLines = doc.splitTextToSize(pname, lw - sw);
+        const purl = card.querySelector('.project-links a');
+        if (purl) {
+          doc.textWithLink(nameLines[0], ml, yL, { url: purl.href });
+        } else {
+          doc.text(nameLines[0], ml, yL);
+        }
+        if (pstatus) {
+          doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...green);
+          doc.text(pstatus, ml + lw, yL, { align: 'right' });
+        }
+        yL += 8.5 * 0.41 + 0.5;
+        if (nameLines.length > 1) {
+          doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark);
+          doc.text(nameLines.slice(1), ml, yL);
+          yL += (nameLines.length - 1) * 8.5 * 0.41 + 0.3;
+        }
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...mid);
+        const dlines = doc.splitTextToSize(pdesc, lw - 3);
+        doc.text(dlines.slice(0, 2), ml + 3, yL);
+        yL += Math.min(2, dlines.length) * 8 * 0.41 + 3;
+      });
+
+      // "Also contributed to" from oss-item list
+      const ossNames = Array.from(document.querySelectorAll('.oss-item .oss-name')).map(el => txt(el));
+      if (ossNames.length) {
+        sp('L', 1);
+        doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(...gray);
+        const alsoLines = doc.splitTextToSize('Also contributed to: ' + ossNames.join(', '), lw);
+        doc.text(alsoLines, ml, yL);
+        yL += alsoLines.length * 8 * 0.41 + 2;
+      }
+
+      // ── Right: Skills (first for visual balance) ──────────
+      section('R', 'SKILLS');
+      document.querySelectorAll('.skill-card').forEach(card => {
+        write('R', txt(card.querySelector('h3')), 8, 'bold', dark);
+        sp('R', 0.5);
+        // Highlight tags in green bold, normal tags in gray
+        const highlightTags = Array.from(card.querySelectorAll('.tag.highlight')).map(t => txt(t));
+        const normalTags    = Array.from(card.querySelectorAll('.tag:not(.highlight)')).map(t => txt(t));
+        if (highlightTags.length) {
+          write('R', highlightTags.join(', '), 7.5, 'bold', green, 2);
+          sp('R', 0.3);
+        }
+        if (normalTags.length) {
+          write('R', normalTags.join(', '), 7.5, 'normal', mid, 2);
+        }
+        sp('R', 3);
+      });
+
+      // ── Right: Education / Certs / Awards ────────────────
+      Array.from(document.querySelectorAll('.cv-col')[1].children).forEach(child => {
+        if (child.tagName === 'H3') {
+          section('R', child.textContent.replace('//', '').trim().toUpperCase());
+        } else if (child.classList.contains('cv-entry')) {
+          rightEntry(
+            txt(child.querySelector('.cv-date')),
+            txt(child.querySelector('.cv-title')),
+            txt(child.querySelector('.cv-org')),
+          );
+        }
+      });
+
+      // ── Column divider — stops at shorter column ──────────
+      doc.setDrawColor(...lgray); doc.setLineWidth(0.15);
+      doc.line(rx - gutter / 2, colDividerStartY, rx - gutter / 2, Math.min(yL, yR));
+
+      // ── Footer on every page ─────────────────────────────
+      // Last updated: read from most recent cv-date in DOM
+      const allDates = Array.from(document.querySelectorAll('.cv-date')).map(el => txt(el));
+      const hasPresent = allDates.some(d => /present/i.test(d));
+      const lastYear = hasPresent
+        ? new Date().getFullYear()
+        : Math.max(...allDates.flatMap(d => (d.match(/\d{4}/g) || []).map(Number)));
+
+      const total = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= total; i++) {
+        doc.setPage(i);
+        doc.setDrawColor(...lgray); doc.setLineWidth(0.15);
+        doc.line(ml, H - mb + 1, W - mr, H - mb + 1);
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lgray);
+        doc.text('Last updated · ' + lastYear, ml, H - mb + 5);
+        doc.text(i + ' / ' + total, W - mr, H - mb + 5, { align: 'right' });
+      }
+
+      doc.save('GoncaloGomes_CV.pdf');
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('PDF generation failed: ' + err.message);
+    } finally {
+      btn.textContent = '↓ Download PDF';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
