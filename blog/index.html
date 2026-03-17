@@ -272,6 +272,8 @@
   let allPosts = [];
   let activeTag = '';
   let currentQuery = '';
+  let bodiesLoaded = false;
+  let bodiesLoadingPromise = null;
 
   function formatDate(iso) {
     const d = new Date(iso);
@@ -319,9 +321,29 @@
         p.title.toLowerCase().includes(kw) ||
         (p.description || '').toLowerCase().includes(kw) ||
         (p.tags || []).some(t => t.toLowerCase().includes(kw)) ||
-        p.content.toLowerCase().includes(kw)
+        (p.content !== null && p.content.toLowerCase().includes(kw))
       );
     });
+  }
+
+  function ensureBodiesLoaded() {
+    if (bodiesLoaded) return Promise.resolve();
+    if (bodiesLoadingPromise) return bodiesLoadingPromise;
+    bodiesLoadingPromise = Promise.all(allPosts.map(async p => {
+      if (p.content !== null) return;
+      try {
+        const r = await fetch(`posts/${p.slug}.md`);
+        if (!r.ok) { p.content = ''; return; }
+        const raw = await r.text();
+        const { body } = parseFrontmatter(raw);
+        p.content = body
+          .replace(/```[\s\S]*?```/g, ' ')
+          .replace(/`[^`]+`/g, ' ')
+          .replace(/[#*_[\]()>]/g, ' ')
+          .replace(/\s+/g, ' ').trim();
+      } catch { p.content = ''; }
+    })).then(() => { bodiesLoaded = true; bodiesLoadingPromise = null; });
+    return bodiesLoadingPromise;
   }
 
   function renderTagFilters() {
@@ -407,35 +429,20 @@
     try {
       const res = await fetch('posts.json');
       if (!res.ok) throw new Error('Failed to load posts.json');
-      const slugs = await res.json();
+      const posts = await res.json();
 
-      if (slugs.length === 0) { allPosts = []; renderPosts([]); return; }
+      if (posts.length === 0) { allPosts = []; renderPosts([]); return; }
 
-      allPosts = (await Promise.all(slugs.map(async slug => {
-        try {
-          const r = await fetch(`posts/${slug}.md`);
-          if (!r.ok) return null;
-          const raw = await r.text();
-          const { meta, body } = parseFrontmatter(raw);
-          const content = body
-            .replace(/```[\s\S]*?```/g, ' ')
-            .replace(/`[^`]+`/g, ' ')
-            .replace(/[#*_[\]()>]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-          return {
-            slug,
-            title:       meta.title       || slug,
-            date:        meta.date        || '',
-            description: meta.description || '',
-            tags:        Array.isArray(meta.tags) ? meta.tags : [],
-            content,
-            readTime:    readingTime(body),
-          };
-        } catch { return null; }
-      }))).filter(Boolean);
+      allPosts = posts.map(p => ({
+        slug:        p.slug,
+        title:       p.title        || p.slug,
+        date:        p.date         || '',
+        description: p.description  || '',
+        tags:        Array.isArray(p.tags) ? p.tags : [],
+        readTime:    p.read_time    || '',
+        content:     null,
+      }));
 
-      allPosts.sort((a, b) => b.date.localeCompare(a.date));
       renderTagFilters();
       renderPosts(getFiltered());
     } catch (err) {
@@ -448,9 +455,13 @@
     const input = document.getElementById('search-input');
     const hint  = document.getElementById('search-hint');
 
-    input.addEventListener('input', e => {
+    input.addEventListener('input', async e => {
       currentQuery = e.target.value;
       renderPosts(getFiltered());
+      if (currentQuery.trim()) {
+        await ensureBodiesLoaded();
+        renderPosts(getFiltered());
+      }
     });
     input.addEventListener('keydown', e => {
       if (e.key === 'Escape') { input.value = ''; currentQuery = ''; renderPosts(getFiltered()); input.blur(); }

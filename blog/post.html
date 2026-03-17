@@ -7,6 +7,8 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="">
 <meta property="og:description" content="">
+<meta property="og:url" content="">
+<meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
@@ -391,9 +393,11 @@
 
       const title = meta.title || slug;
       const desc  = meta.description || '';
+      const BASE_URL = 'https://gomesgoncalo.github.io';
       document.title = title + ' — Gonçalo Gomes';
       document.querySelector('meta[property="og:title"]').setAttribute('content', title + ' — Gonçalo Gomes');
       document.querySelector('meta[property="og:description"]').setAttribute('content', desc);
+      document.querySelector('meta[property="og:url"]').setAttribute('content', `${BASE_URL}/blog/post.html?slug=${encodeURIComponent(slug)}`);
 
       const tags = Array.isArray(meta.tags) ? meta.tags : [];
       const tagsHTML = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');

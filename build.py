@@ -46,9 +46,15 @@ for fname in os.listdir(POSTS_DIR):
 posts = [p for p in posts if p.get('draft') == 'false']
 posts.sort(key=lambda p: p['date'], reverse=True)
 
-# posts.json — slugs only, newest first
+def reading_time(text):
+    words = len(text.strip().split())
+    return f"{max(1, (words + 199) // 200)} min read"
+
+# posts.json — metadata objects, newest first
+meta_fields = ['slug', 'title', 'date', 'description', 'tags']
+out = [{**{k: p[k] for k in meta_fields}, 'read_time': reading_time(p['body'])} for p in posts]
 with open(os.path.join(ROOT, 'blog', 'posts.json'), 'w', encoding='utf-8') as f:
-    json.dump([p['slug'] for p in posts], f, indent=2, ensure_ascii=False)
+    json.dump(out, f, indent=2, ensure_ascii=False)
 print(f'posts.json: {len(posts)} post(s)')
 
 # rss.xml
@@ -88,3 +94,22 @@ rss = f"""<?xml version="1.0" encoding="UTF-8"?>
 with open(os.path.join(ROOT, 'rss.xml'), 'w', encoding='utf-8') as f:
     f.write(rss)
 print(f'rss.xml: {len(items)} item(s)')
+
+# sitemap.xml
+static_urls = [BASE_URL + path for path in ('/', '/blog/')]
+post_urls   = [f'{BASE_URL}/blog/post.html?slug={p["slug"]}'
+               + (f'<lastmod>{p["date"]}</lastmod>' if p['date'] else '')
+               for p in posts]
+sitemap_entries = [f'  <url><loc>{u}</loc></url>' for u in static_urls] + \
+                  [f'  <url><loc>{BASE_URL}/blog/post.html?slug={p["slug"]}</loc>'
+                   + (f'<lastmod>{p["date"]}</lastmod>' if p['date'] else '')
+                   + '</url>' for p in posts]
+sitemap = (
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + '\n'.join(sitemap_entries) + '\n'
+    '</urlset>'
+)
+with open(os.path.join(ROOT, 'sitemap.xml'), 'w', encoding='utf-8') as f:
+    f.write(sitemap)
+print(f'sitemap.xml: {len(sitemap_entries)} URL(s)')
