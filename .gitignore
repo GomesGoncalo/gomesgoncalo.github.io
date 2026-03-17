@@ -1,3 +1,4 @@
 blog/posts.json
+blog/posts/*.html
 rss.xml
 sitemap.xml

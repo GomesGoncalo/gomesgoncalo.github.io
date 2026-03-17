@@ -23,7 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build (posts.json + rss.xml)
+      - name: Install Python dependencies
+        run: pip install markdown
+
+      - name: Build (static posts, posts.json, rss.xml, sitemap.xml)
         run: python3 build.py
 
       - uses: actions/configure-pages@v5

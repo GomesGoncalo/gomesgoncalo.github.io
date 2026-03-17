@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Build: generates blog/posts.json (slugs sorted newest-first) and rss.xml."""
+"""Build: generates static post HTML, posts.json, rss.xml, and sitemap.xml."""
 
 import json, os, re
 from datetime import datetime, timezone
 from email.utils import format_datetime
+from html import escape as he
+import markdown as mdlib
 
 ROOT      = os.path.dirname(os.path.abspath(__file__))
 POSTS_DIR = os.path.join(ROOT, 'blog', 'posts')
@@ -26,6 +28,124 @@ def parse_frontmatter(text):
         meta[key] = val
     return meta, text[m.end():]
 
+def reading_time(text):
+    words = len(text.strip().split())
+    return f"{max(1, (words + 199) // 200)} min read"
+
+def format_date(date_str):
+    try:
+        dt = datetime.fromisoformat(date_str)
+        return f"{dt.day} {dt.strftime('%B %Y')}"
+    except ValueError:
+        return date_str
+
+def render_post_html(p):
+    slug        = p['slug']
+    title       = p['title']
+    description = p['description']
+    tags        = p['tags']
+    read_time   = reading_time(p['body'])
+    post_url    = f"{BASE_URL}/blog/posts/{slug}.html"
+
+    md = mdlib.Markdown(extensions=['extra'])
+    body_html = md.convert(p['body'])
+
+    formatted_date = format_date(p['date']) if p['date'] else ''
+    tags_html = ''.join(f'<span class="tag">{he(t)}</span>' for t in tags)
+
+    meta_parts = []
+    if formatted_date:
+        meta_parts.append(f'<span class="post-date">{he(formatted_date)}</span>')
+    meta_parts.append(f'<span class="read-time">{he(read_time)}</span>')
+    if tags_html:
+        meta_parts.append(f'<div class="post-tags">{tags_html}</div>')
+    meta_html = '\n          '.join(meta_parts)
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{he(title)} — Gonçalo Gomes</title>
+<meta name="description" content="{he(description)}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{he(title)} — Gonçalo Gomes">
+<meta property="og:description" content="{he(description)}">
+<meta property="og:url" content="{post_url}">
+<link rel="canonical" href="{post_url}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
+<link rel="stylesheet" href="../../shared.css">
+<link rel="stylesheet" href="../post.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<link rel="alternate" type="application/rss+xml" title="Gonçalo Gomes — Blog" href="/rss.xml">
+</head>
+<body>
+
+<div id="reading-progress"></div>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span>~/</span>gg</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="../../index.html#skills" onclick="closeNav()">skills</a></li>
+    <li><a href="../../index.html#cv" onclick="closeNav()">cv</a></li>
+    <li><a href="../../index.html#projects" onclick="closeNav()">projects</a></li>
+    <li><a href="../../index.html#passions" onclick="closeNav()">passions</a></li>
+    <li><a href="../../index.html#contact" onclick="closeNav()">contact</a></li>
+    <li><a href="../index.html" class="active" onclick="closeNav()">blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◐</button>
+    <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <header class="post-header">
+      <div class="terminal-line">
+        <span class="prompt-sym">❯</span>
+        <span class="prompt-path">~/blog/posts</span>
+        <span class="prompt-cmd">cat {he(slug)}.md</span>
+      </div>
+      <h1 class="post-title">{he(title)}</h1>
+      <div class="post-meta-bar">
+        {meta_html}
+      </div>
+    </header>
+    <article class="post-content" id="post-content">
+{body_html}
+    </article>
+    <div class="post-nav">
+      <a href="../index.html">← all posts</a>
+      <a href="../../index.html">portfolio</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <a href="../index.html">← all posts</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../post-utils.js"></script>
+<script src="../../shared.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {{
+    const contentEl = document.getElementById('post-content');
+    hljs.highlightAll();
+    buildToc(contentEl);
+    addCopyButtons(contentEl);
+    initProgressBar();
+  }});
+</script>
+</body>
+</html>"""
+
 posts = []
 for fname in os.listdir(POSTS_DIR):
     if not fname.endswith('.md'):
@@ -40,15 +160,19 @@ for fname in os.listdir(POSTS_DIR):
         'date':        meta.get('date', ''),
         'description': meta.get('description', ''),
         'tags':        meta.get('tags', []),
+        'draft':       meta.get('draft', 'true'),
         'body':        body,
     })
 
 posts = [p for p in posts if p.get('draft') == 'false']
 posts.sort(key=lambda p: p['date'], reverse=True)
 
-def reading_time(text):
-    words = len(text.strip().split())
-    return f"{max(1, (words + 199) // 200)} min read"
+# Static post HTML
+for p in posts:
+    out_path = os.path.join(POSTS_DIR, p['slug'] + '.html')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(render_post_html(p))
+print(f'posts/*.html: {len(posts)} file(s)')
 
 # posts.json — metadata objects, newest first
 meta_fields = ['slug', 'title', 'date', 'description', 'tags']
@@ -70,7 +194,7 @@ for p in posts:
         pub = format_datetime(dt)
     except ValueError:
         pub = p['date']
-    link = f"{BASE_URL}/blog/post.html?slug={p['slug']}"
+    link = f"{BASE_URL}/blog/posts/{p['slug']}.html"
     items.append(f"""  <item>
     <title>{xml(p['title'])}</title>
     <link>{link}</link>
@@ -96,14 +220,15 @@ with open(os.path.join(ROOT, 'rss.xml'), 'w', encoding='utf-8') as f:
 print(f'rss.xml: {len(items)} item(s)')
 
 # sitemap.xml
-static_urls = [BASE_URL + path for path in ('/', '/blog/')]
-post_urls   = [f'{BASE_URL}/blog/post.html?slug={p["slug"]}'
-               + (f'<lastmod>{p["date"]}</lastmod>' if p['date'] else '')
-               for p in posts]
-sitemap_entries = [f'  <url><loc>{u}</loc></url>' for u in static_urls] + \
-                  [f'  <url><loc>{BASE_URL}/blog/post.html?slug={p["slug"]}</loc>'
-                   + (f'<lastmod>{p["date"]}</lastmod>' if p['date'] else '')
-                   + '</url>' for p in posts]
+sitemap_entries = [
+    f'  <url><loc>{BASE_URL}/</loc></url>',
+    f'  <url><loc>{BASE_URL}/blog/</loc></url>',
+] + [
+    f'  <url><loc>{BASE_URL}/blog/posts/{p["slug"]}.html</loc>'
+    + (f'<lastmod>{p["date"]}</lastmod>' if p['date'] else '')
+    + '</url>'
+    for p in posts
+]
 sitemap = (
     '<?xml version="1.0" encoding="UTF-8"?>\n'
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

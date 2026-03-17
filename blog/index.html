@@ -390,7 +390,7 @@
         : bodySnippet(p.content, q) || highlight(p.description || '', q);
 
       return `
-        <a class="post-entry" href="post.html?slug=${encodeURIComponent(p.slug)}">
+        <a class="post-entry" href="posts/${encodeURIComponent(p.slug)}.html">
           <div class="post-meta">
             <span class="post-date">${formatDate(p.date)}</span>
             <span class="read-time">${p.readTime}</span>
