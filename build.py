@@ -43,6 +43,7 @@ for fname in os.listdir(POSTS_DIR):
         'body':        body,
     })
 
+posts = [p for p in posts if p.get('draft') == 'false']
 posts.sort(key=lambda p: p['date'], reverse=True)
 
 # posts.json — slugs only, newest first

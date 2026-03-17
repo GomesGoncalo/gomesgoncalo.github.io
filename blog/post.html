@@ -384,6 +384,11 @@
       const raw = await res.text();
       const { meta, body } = parseFrontmatter(raw);
 
+      if (meta.draft !== 'false') {
+        main.innerHTML = `<div class="container"><div class="state-msg">Post not found.</div></div>`;
+        return;
+      }
+
       const title = meta.title || slug;
       const desc  = meta.description || '';
       document.title = title + ' — Gonçalo Gomes';
