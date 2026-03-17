@@ -6,92 +6,11 @@
 <title>Gonçalo Gomes — Software Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
+<link rel="stylesheet" href="shared.css">
+<link rel="alternate" type="application/rss+xml" title="Gonçalo Gomes — Blog" href="/rss.xml">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0a0e13;
-    --bg2: #0f141b;
-    --bg3: #141b24;
-    --surface: #1a2230;
-    --border: #1e2d3d;
-    --border2: #263545;
-    --green: #00ff88;
-    --green2: #00cc6a;
-    --green-dim: rgba(0,255,136,0.08);
-    --green-glow: rgba(0,255,136,0.15);
-    --blue: #4db8ff;
-    --amber: #ffb347;
-    --red: #ff5f57;
-    --text: #e2e8f0;
-    --text2: #8899aa;
-    --text3: #4d6070;
-    --mono: 'JetBrains Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 14px;
-    line-height: 1.7;
-    min-height: 100vh;
-  }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-  /* SELECTION */
-  ::selection { background: var(--green-glow); color: var(--green); }
-
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(10,14,19,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-
-  .nav-logo {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--green);
-    letter-spacing: 0.02em;
-    text-decoration: none;
-  }
-  .nav-logo span { color: var(--text3); }
-
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
-  .nav-links a {
-    font-size: 12px;
-    color: var(--text2);
-    text-decoration: none;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: color 0.2s;
-    position: relative;
-  }
-  .nav-links a::before {
-    content: '# ';
-    color: var(--green);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .nav-links a:hover { color: var(--text); }
-  .nav-links a:hover::before { opacity: 1; }
-
-  /* LAYOUT */
-  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
-
   section { padding: 5rem 0; }
 
   /* SECTION HEADER */
@@ -727,44 +646,9 @@
   }
   .passion-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
 
-  /* BACK TO TOP */
-  .back-to-top {
-    display: none;
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 200;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 0.5rem 0.9rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .back-to-top:hover { color: var(--green); border-color: var(--green); }
-  .back-to-top.visible { display: block; }
-
   @media (max-width: 600px) {
-    nav { padding: 0 1rem; }
-    .container { padding: 0 1.2rem; }
     section { padding: 3.5rem 0; }
     .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
-    .nav-burger { display: flex; }
-    .nav-links {
-      display: none;
-      position: absolute;
-      top: 56px; left: 0; right: 0;
-      background: rgba(10,14,19,0.97);
-      backdrop-filter: blur(12px);
-      flex-direction: column;
-      padding: 1rem 2rem 1.5rem;
-      gap: 1.2rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-links.open { display: flex; }
   }
 </style>
 </head>
@@ -781,9 +665,12 @@
     <li><a href="#contact" onclick="closeNav()">contact</a></li>
     <li><a href="blog/index.html" onclick="closeNav()">blog</a></li>
   </ul>
-  <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav-right">
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◐</button>
+    <button class="nav-burger" id="nav-burger" aria-label="Toggle menu" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -1221,16 +1108,6 @@
     backToTop.classList.toggle('visible', window.scrollY > 300);
   });
 
-  // Mobile nav
-  function toggleNav() {
-    document.getElementById('nav-links').classList.toggle('open');
-    document.getElementById('nav-burger').classList.toggle('open');
-  }
-  function closeNav() {
-    document.getElementById('nav-links').classList.remove('open');
-    document.getElementById('nav-burger').classList.remove('open');
-  }
-
   // PDF generation — build content with jsPDF directly (no html2canvas)
   document.getElementById('download-pdf').addEventListener('click', async function(e) {
     e.preventDefault();
@@ -1519,5 +1396,23 @@
     }
   });
 </script>
+<script>
+  // Active nav link highlighting based on scroll position
+  (function() {
+    const navLinks = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+    const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.classList.remove('active'));
+          const link = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    sections.forEach(s => observer.observe(s));
+  })();
+</script>
+<script src="shared.js"></script>
 </body>
 </html>

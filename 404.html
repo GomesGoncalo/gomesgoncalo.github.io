@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Gonçalo Gomes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
+<link rel="stylesheet" href="/shared.css">
+<link rel="alternate" type="application/rss+xml" title="Gonçalo Gomes — Blog" href="/rss.xml">
+<style>
+  .error-wrap {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  .error-inner { max-width: 480px; width: 100%; }
+  .error-code {
+    font-family: var(--sans);
+    font-size: clamp(5rem, 20vw, 9rem);
+    font-weight: 800;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .error-code span { color: var(--green); }
+  .error-msg {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+  }
+  .error-cmd {
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 2rem;
+  }
+  .error-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .error-links a {
+    font-size: 13px;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .error-links a:hover { color: var(--green); }
+  .error-links a::before { content: '→ '; color: var(--green); }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/index.html" class="nav-logo"><span>~/</span>gg</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="/index.html">home</a></li>
+    <li><a href="/blog/index.html">blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◐</button>
+  </div>
+</nav>
+
+<div class="error-wrap">
+  <div class="error-inner">
+    <div class="terminal-line">
+      <span class="prompt-sym">❯</span>
+      <span class="prompt-path">~</span>
+      <span class="prompt-cmd">cat <span id="path-display"></span></span>
+    </div>
+    <div class="error-code"><span>4</span>0<span>4</span></div>
+    <div class="error-msg">bash: <span id="path-msg"></span>: No such file or directory</div>
+    <div class="error-cmd">exit code 1</div>
+    <div class="error-links">
+      <a href="/index.html">go home</a>
+      <a href="/blog/index.html">read the blog</a>
+    </div>
+  </div>
+</div>
+
+<script src="/shared.js"></script>
+<script>
+  const p = location.pathname;
+  document.getElementById('path-display').textContent = p;
+  document.getElementById('path-msg').textContent = p;
+</script>
+</body>
+</html>
