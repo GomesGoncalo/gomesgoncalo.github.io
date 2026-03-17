@@ -8,7 +8,7 @@
 <meta property="og:title" content="">
 <meta property="og:description" content="">
 <meta property="og:url" content="">
-<meta property="og:type" content="article">
+<link rel="canonical" href="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
@@ -275,6 +275,7 @@
 
 <main id="main">
   <div class="container">
+    <noscript><div class="state-msg">JavaScript is required to view this post.</div></noscript>
     <div class="state-msg" id="status">Loading post...</div>
   </div>
 </main>
@@ -397,7 +398,9 @@
       document.title = title + ' — Gonçalo Gomes';
       document.querySelector('meta[property="og:title"]').setAttribute('content', title + ' — Gonçalo Gomes');
       document.querySelector('meta[property="og:description"]').setAttribute('content', desc);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', `${BASE_URL}/blog/post.html?slug=${encodeURIComponent(slug)}`);
+      const postUrl = `${BASE_URL}/blog/post.html?slug=${encodeURIComponent(slug)}`;
+      document.querySelector('meta[property="og:url"]').setAttribute('content', postUrl);
+      document.querySelector('link[rel="canonical"]').setAttribute('href', postUrl);
 
       const tags = Array.isArray(meta.tags) ? meta.tags : [];
       const tagsHTML = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');

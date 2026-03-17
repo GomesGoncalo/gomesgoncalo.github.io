@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gomesgoncalo.github.io/sitemap.xml

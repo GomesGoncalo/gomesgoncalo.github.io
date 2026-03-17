@@ -257,6 +257,7 @@
     <div id="tag-filters" class="tag-filters"></div>
 
     <div class="post-list" id="post-list">
+      <noscript><div class="empty-state">JavaScript is required to view posts.</div></noscript>
       <div class="loading">Loading posts</div>
     </div>
   </div>
@@ -299,6 +300,7 @@
   }
 
   function bodySnippet(content, query) {
+    if (!content) return '';
     const keywords = query.trim().split(/\s+/).filter(Boolean);
     for (const kw of keywords) {
       const idx = content.toLowerCase().indexOf(kw.toLowerCase());
