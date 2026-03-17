@@ -554,29 +554,6 @@
     transform: translateY(0);
   }
 
-  /* HAMBURGER */
-  .nav-burger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-  }
-  .nav-burger span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text2);
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-  .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .nav-burger.open span:nth-child(2) { opacity: 0; }
-  .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
   /* OSS LIST */
   .oss-list {
     margin-top: 1.5rem;
