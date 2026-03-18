@@ -21,7 +21,7 @@ year. Anyone can enter. You do the same workouts as the top athletes in the worl
 submit your score, and get ranked globally. The gap between you and those athletes
 will be humbling. That is, apparently, the point.
 
-There are three workouts — one released each week over three weeks. Each workout has three versions: RX (the prescribed workout), Scaled (modified movements or lower weights, or both) and Foundations (a further scaled version). There are also Teenager and Masters (55+) categories.
+There are three workouts - one released each week over three weeks. Each workout has three versions: RX (the prescribed workout), Scaled (modified movements or lower weights, or both) and Foundations (a further scaled version). There are also Teenager and Masters (55+) categories.
 
 Although I wanted to RX things, I had no expectation of actually doing it. I was wrong about that, at least a little.
 
@@ -39,7 +39,9 @@ Hummm... What?
 
 ![confused here](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2Zkc3hjbnRqcml6cDdhdTB4NWljZ3dybTIzNm1wcDZlbWIzMTR2aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3o7aTskHEUdgCQAXde/giphy.gif)
 
-So anyway... here is the workout:
+And proceeds to write the same number of reps in reverse order all the way down.
+
+Here is the workout:
 
 > For time:
 
@@ -194,7 +196,7 @@ Sigh... thrusters... and waaaaay too many burpees!
 
 Similarly to the previous workout, I cannot possibly yet do thrusters at weight 2 and 3. But here my thinking was that the workout does not start with that and I sorta can do the first 2 rounds and even the weight 2 cleans.
 
-So, strategically, I though I'd get capped even in a scaled workout. I could actually do just as well in the RX one.
+So, thinking strategically, I thought I would get capped even in a scaled workout. I could actually do just as well in the RX one.
 
 ![let's be smart about this](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGV0Nnhqcmo2amI2cnJqanpzNHJuajNzcmc0b3JsN3R2dXp6eDU2MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/d3mlE7uhX8KFgEmY/giphy.gif)
 

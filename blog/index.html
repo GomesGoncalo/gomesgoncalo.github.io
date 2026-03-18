@@ -437,7 +437,7 @@
   async function loadPosts() {
     const list = document.getElementById('post-list');
     try {
-      const res = await fetch('posts.json');
+      const res = await fetch('posts.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('Failed to load posts.json');
       const posts = await res.json();
 
