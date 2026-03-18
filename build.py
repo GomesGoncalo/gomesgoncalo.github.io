@@ -52,6 +52,14 @@ def format_date(date_str):
     except ValueError:
         return date_str
 
+def figcaptionify(html):
+    """Wrap <img title="..."> in <figure><figcaption> so titles render as visible captions."""
+    return re.sub(
+        r'<img\s([^>]*?)title="([^"]+)"([^>]*)>',
+        lambda m: f'<figure><img {m.group(1)}{m.group(3)}><figcaption>{he(m.group(2))}</figcaption></figure>',
+        html
+    )
+
 def render_post_html(p):
     slug        = p['slug']
     title       = p['title']
@@ -61,7 +69,7 @@ def render_post_html(p):
     post_url    = f"{BASE_URL}/blog/posts/{slug}.html"
 
     md = mdlib.Markdown(extensions=['extra'])
-    body_html = md.convert(p['body'])
+    body_html = figcaptionify(md.convert(p['body']))
 
     formatted_date = format_date(p['date']) if p['date'] else ''
     tags_html = ''.join(f'<span class="tag">{he(t)}</span>' for t in tags)
@@ -264,22 +272,25 @@ def build(include_drafts):
     print(f'sitemap.xml: {len(sitemap_entries)} URL(s)')
 
 
-# Files whose changes should trigger a rebuild: post sources and the build script itself
-WATCH_PATHS = [
-    POSTS_DIR,                          # .md files
-    os.path.join(ROOT, 'build.py'),     # template changes
-]
+ASSETS_DIR = os.path.join(POSTS_DIR, 'assets')
+
+IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.avif'}
 
 def get_mtimes():
     mtimes = {}
-    for path in WATCH_PATHS:
-        if os.path.isfile(path):
-            mtimes[path] = os.stat(path).st_mtime
-        elif os.path.isdir(path):
-            for fname in os.listdir(path):
-                if fname.endswith('.md'):
-                    full = os.path.join(path, fname)
-                    mtimes[full] = os.stat(full).st_mtime
+    # .md files and build script trigger a full rebuild
+    for fname in os.listdir(POSTS_DIR):
+        if fname.endswith('.md'):
+            full = os.path.join(POSTS_DIR, fname)
+            mtimes[full] = ('rebuild', os.stat(full).st_mtime)
+    build_py = os.path.join(ROOT, 'build.py')
+    mtimes[build_py] = ('rebuild', os.stat(build_py).st_mtime)
+    # asset files only need a browser reload
+    if os.path.isdir(ASSETS_DIR):
+        for fname in os.listdir(ASSETS_DIR):
+            if os.path.splitext(fname)[1].lower() in IMAGE_EXTS:
+                full = os.path.join(ASSETS_DIR, fname)
+                mtimes[full] = ('reload', os.stat(full).st_mtime)
     return mtimes
 
 
@@ -363,13 +374,17 @@ if args.serve:
         while True:
             time.sleep(1)
             current_mtimes = get_mtimes()
-            changed = [p for p, t in current_mtimes.items() if last_mtimes.get(p) != t]
-            new_files = [p for p in current_mtimes if p not in last_mtimes]
-            if changed or new_files:
-                for p in changed + new_files:
-                    print(f'changed: {os.path.relpath(p, ROOT)}')
-                print('rebuilding...')
-                build(args.drafts)
+            changed = {p: action for p, (action, t) in current_mtimes.items()
+                       if last_mtimes.get(p, (None, None))[1] != t}
+            new_files = {p: action for p, (action, _) in current_mtimes.items()
+                         if p not in last_mtimes}
+            all_changed = {**changed, **new_files}
+            if all_changed:
+                for p, action in all_changed.items():
+                    print(f'[{action}] {os.path.relpath(p, ROOT)}')
+                if any(a == 'rebuild' for a in all_changed.values()):
+                    print('rebuilding...')
+                    build(args.drafts)
                 _notify_clients()
                 last_mtimes = current_mtimes
     except KeyboardInterrupt:

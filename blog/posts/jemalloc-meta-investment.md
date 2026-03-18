@@ -8,10 +8,12 @@ tags: [allocators, jemalloc, rust, cpp, benchmarking]
 
 ## What is jemalloc?
 
-[jemalloc](https://jemalloc.net/) is a malloc implementation that focuses on fragmentation.
-Recently, there have been [news](https://engineering.fb.com/2026/03/02/data-infrastructure/investing-in-infrastructure-metas-renewed-commitment-to-jemalloc/) about Meta's investment in the project
-and I thought it'd be interesting to look into the software I develop
-and use on a daily basis.
+[jemalloc](https://jemalloc.net/) is a malloc implementation originally developed by
+Jason Evans for FreeBSD, designed with a primary focus on reducing heap
+fragmentation[^jemalloc-paper]. Recently, there have been
+[news](https://engineering.fb.com/2026/03/02/data-infrastructure/investing-in-infrastructure-metas-renewed-commitment-to-jemalloc/)
+about Meta's renewed investment in the project, and I thought it'd be interesting to
+look into the software I develop and use on a daily basis.
 
 ## Why Memory Allocation Matters
 
@@ -30,10 +32,10 @@ be less critical, but it can still impact performance and memory usage.
 ## How jemalloc Works
 
 <!-- TODO: expand each bullet into prose -->
-- **Arena-based design**: thread-local arenas reduce lock contention compared to a single global heap lock (ptmalloc2's approach)
-- **Size-class segregation**: allocations are bucketed into discrete size classes, reducing internal fragmentation
-- **Extent management and dirty page decay**: jemalloc tracks extents (contiguous memory ranges) and returns dirty pages to the OS on a configurable decay timer, keeping RSS low over time
-- **Differences from alternatives**: ptmalloc2 (glibc default) uses per-thread arenas but lacks jemalloc's fine-grained size classes; tcmalloc (Google) focuses on throughput over fragmentation
+- **Arena-based design**: thread-local arenas reduce lock contention compared to glibc's allocator, where competing threads share a small pool of arenas protected by locks[^jemalloc-arenas]
+- **Size-class segregation**: allocations are bucketed into discrete size classes, reducing internal fragmentation by limiting wasted space within each allocation[^jemalloc-sizing]
+- **Extent management and dirty page decay**: jemalloc tracks extents (contiguous memory ranges) and returns dirty pages to the OS on a configurable decay timer, keeping RSS bounded over time[^jemalloc-decay]
+- **Differences from alternatives**: glibc's allocator[^ptmalloc2] uses per-thread arenas but with coarser size classes; tcmalloc (Google) prioritises throughput over fragmentation control[^tcmalloc]
 
 ## Meta's Investment — What Changed
 
@@ -64,7 +66,7 @@ LD_PRELOAD=/usr/lib/libjemalloc.so.2 hypr-overlay-wl
 
 Both runs used the same binary. The process was then profiled with
 [heaptrack](https://github.com/KDE/heaptrack), attached to the running PID after
-enabling ptrace:
+lowering the kernel's Yama ptrace scope[^ptrace-scope]:
 
 ```bash
 echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
@@ -73,26 +75,25 @@ heaptrack --pid $(pgrep hypr-overlay-wl)
 
 ### Results
 
-| Metric | glibc (ptmalloc2) | jemalloc | Delta |
+| Metric | glibc | jemalloc | Delta |
 |---|---|---|---|
 | Runtime | 17.02 s | 15.34 s | — |
 | Alloc calls/s | 4,521 | 4,905 | +8.5% |
 | Temporary allocs/s | 1,564 | 1,726 | +10.4% |
 | Peak heap | 154.70 KB | 138.55 KB | **−10.4%** |
 | Peak RSS | 177.24 MB | 209.52 MB | **+18.2%** |
-| Leaked | 114.15 KB | 97.78 KB | −14.3% |
 
 The runtimes differ because these were live sessions of different lengths, not
 controlled identical workloads — throughput figures (per-second rates) are the
 meaningful comparison.
 
-jemalloc reduces peak heap consumption by 10% and leaked memory by 14%, confirming
+jemalloc reduces peak heap consumption by 10%, confirming
 better fragmentation control. Allocation throughput is marginally higher. However,
 peak RSS increases by 18% — jemalloc pre-allocates thread arenas at startup and
 maps them eagerly from the OS. For a session this short (15–17 s), the dirty page
-decay timer (default: 10 s muzzy, 5 s dirty) had barely had time to return pages,
-so more address space was mapped than actively needed. In a longer-running session
-the RSS gap would likely narrow.
+decay timer (default: 10 s muzzy, 5 s dirty[^jemalloc-decay]) had barely had time
+to return pages, so more address space was mapped than actively needed. In a
+longer-running session the RSS gap would likely narrow.
 
 ## A Synthetic Benchmark: Where jemalloc Actually Wins
 
@@ -127,7 +128,7 @@ fn main() {
 
 Profiled with heaptrack under the same `LD_PRELOAD` methodology:
 
-| Metric | glibc (ptmalloc2) | jemalloc | Delta |
+| Metric | glibc | jemalloc | Delta |
 |---|---|---|---|
 | Runtime | 0.54 s | 0.26 s | **−52% (2× faster)** |
 | Alloc calls/s | 1,103,110 | 2,316,957 | **+110% throughput** |
@@ -137,7 +138,7 @@ Profiled with heaptrack under the same `LD_PRELOAD` methodology:
 
 jemalloc is **twice as fast** under 8-thread contention. This is jemalloc's arena design
 in action: each thread gets its own arena, so `malloc` and `free` calls never wait on
-each other. ptmalloc2 serialises threads on a shared lock under pressure — that
+each other. glibc's allocator serialises threads on a shared lock under pressure — that
 serialisation is the 0.28 s gap.
 
 The temporary allocation count dropping from 279 to 44 is also telling: jemalloc
@@ -172,7 +173,7 @@ across many threads will see substantial gains.
 
 - **Rust global allocator conflict**: only one `#[global_allocator]` can be set per
   binary. If a dependency also tries to set one, the build fails. `tikv-jemallocator`
-  is the maintained crate for using jemalloc as the Rust global allocator.
+  is the actively maintained crate for using jemalloc as the Rust global allocator[^tikv-jemalloc].
 
 - **Profiling overhead**: `MALLOC_CONF` options such as `prof:true` add non-trivial
   overhead. Keep profiling builds separate from production.
@@ -188,3 +189,12 @@ across many threads will see substantial gains.
      - When to reach for jemalloc vs sticking with the system allocator
      - Future tooling improvements on the roadmap
 -->
+
+[^jemalloc-paper]: Jason Evans, "A Scalable Concurrent malloc(3) Implementation for FreeBSD" (2006). The design was later refined and published as ["Scalable memory allocation using jemalloc"](https://engineering.fb.com/2011/01/03/core-infra/scalable-memory-allocation-using-jemalloc/) (Meta Engineering, 2011).
+[^jemalloc-arenas]: jemalloc documentation — [arena configuration](https://jemalloc.net/jemalloc.3.html). By default jemalloc creates 4× CPU count arenas; each thread is assigned to one, eliminating cross-thread lock contention for the common case.
+[^jemalloc-sizing]: jemalloc uses a carefully chosen set of size classes that limit internal fragmentation to at most ~25% per allocation. See the [size class tables](https://jemalloc.net/jemalloc.3.html) in the manual.
+[^jemalloc-decay]: Controlled via `MALLOC_CONF=dirty_decay_ms:N,muzzy_decay_ms:N`. Defaults are 10,000 ms (10 s) for muzzy pages and 5,000 ms (5 s) for dirty pages. See [`jemalloc(3)`](https://jemalloc.net/jemalloc.3.html).
+[^ptmalloc2]: glibc's allocator is derived from ptmalloc2 (itself derived from Doug Lea's dlmalloc), with further modifications over the years. See the [glibc malloc internals](https://sourceware.org/glibc/wiki/MallocInternals) wiki for implementation details.
+[^tcmalloc]: Google's [TCMalloc documentation](https://google.github.io/tcmalloc/design.html) describes its design goal of minimising per-operation latency, with fragmentation as a secondary concern.
+[^ptrace-scope]: The Linux kernel's Yama security module restricts `ptrace` to parent processes by default (`ptrace_scope=1`). Setting it to `0` allows any process to attach. See the [kernel documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html).
+[^tikv-jemalloc]: [`tikv-jemallocator`](https://crates.io/crates/tikv-jemallocator) on crates.io. It is a maintained fork of the original `jemallocator` crate, taken over by the TiKV project.
