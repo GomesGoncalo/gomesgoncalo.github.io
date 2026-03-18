@@ -273,7 +273,7 @@
 
 <script>
   let allPosts = [];
-  let activeTag = '';
+  let activeTags = new Set();
   let currentQuery = '';
   let bodiesLoaded = false;
   let bodiesLoadingPromise = null;
@@ -319,7 +319,7 @@
   function getFiltered() {
     const keywords = currentQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return allPosts.filter(p => {
-      if (activeTag && !(p.tags || []).includes(activeTag)) return false;
+      if (activeTags.size > 0 && ![...activeTags].every(t => (p.tags || []).includes(t))) return false;
       if (!keywords.length) return true;
       return keywords.every(kw =>
         p.title.toLowerCase().includes(kw) ||
@@ -356,12 +356,13 @@
     allPosts.forEach(p => (p.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
     const allTags = Object.keys(counts).sort();
     container.innerHTML = allTags.map(t =>
-      `<button class="tag-filter${activeTag === t ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)} <span class="tag-count">(${counts[t]})</span></button>`
+      `<button class="tag-filter${activeTags.has(t) ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)} <span class="tag-count">(${counts[t]})</span></button>`
     ).join('');
   }
 
   function filterByTag(tag) {
-    activeTag = activeTag === tag ? '' : tag;
+    if (activeTags.has(tag)) activeTags.delete(tag);
+    else activeTags.add(tag);
     renderTagFilters();
     renderPosts(getFiltered());
   }
@@ -369,7 +370,7 @@
   function renderPosts(posts) {
     const list    = document.getElementById('post-list');
     const countEl = document.getElementById('post-count');
-    const isFiltering = currentQuery.trim() || activeTag;
+    const isFiltering = currentQuery.trim() || activeTags.size > 0;
 
     countEl.textContent = isFiltering
       ? `${posts.length} of ${allPosts.length} result${posts.length !== 1 ? 's' : ''}`
