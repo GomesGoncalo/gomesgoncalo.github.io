@@ -8,7 +8,7 @@ Usage:
   python3 build.py --drafts --serve --port 8080
 """
 
-import argparse, json, os, re, time, threading, http.server
+import argparse, json, os, queue, re, time, threading, http.server
 from datetime import datetime, timezone
 from email.utils import format_datetime
 from html import escape as he
@@ -283,13 +283,78 @@ def get_mtimes():
     return mtimes
 
 
+# ── LIVE RELOAD ───────────────────────────────────────────────────────────────
+
+_lr_clients: list[queue.Queue] = []
+_lr_lock = threading.Lock()
+
+LIVERELOAD_SCRIPT = b"""<script>
+(function(){
+  var es = new EventSource('/__livereload__');
+  es.onmessage = function(){ location.reload(); };
+  es.onerror   = function(){ es.close(); setTimeout(function(){ location.reload(); }, 500); };
+})();
+</script>"""
+
+def _notify_clients():
+    with _lr_lock:
+        for q in _lr_clients:
+            q.put('reload')
+
+class _Handler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *a): pass  # silence per-request logs
+
+    def do_GET(self):
+        if self.path == '/__livereload__':
+            self._sse()
+            return
+        # Inject livereload script into HTML responses
+        fpath = self.translate_path(self.path)
+        if os.path.isfile(fpath) and fpath.endswith('.html'):
+            self._serve_html(fpath)
+            return
+        super().do_GET()
+
+    def _serve_html(self, fpath):
+        with open(fpath, 'rb') as f:
+            data = f.read()
+        data = data.replace(b'</body>', LIVERELOAD_SCRIPT + b'</body>', 1)
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _sse(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'keep-alive')
+        self.end_headers()
+        q: queue.Queue = queue.Queue()
+        with _lr_lock:
+            _lr_clients.append(q)
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=15)
+                    self.wfile.write(f'data: {msg}\n\n'.encode())
+                except queue.Empty:
+                    self.wfile.write(b': heartbeat\n\n')  # keep connection alive
+                self.wfile.flush()
+        except Exception:
+            pass
+        finally:
+            with _lr_lock:
+                _lr_clients.remove(q)
+
+# ── ENTRY POINT ───────────────────────────────────────────────────────────────
+
 build(args.drafts)
 
 if args.serve:
     os.chdir(ROOT)
-    handler = http.server.SimpleHTTPRequestHandler
-    handler.log_message = lambda *a: None  # silence per-request logs
-    httpd = http.server.HTTPServer(('', args.port), handler)
+    httpd = http.server.ThreadingHTTPServer(('', args.port), _Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     print(f'serving at http://localhost:{args.port}  (Ctrl+C to stop)')
 
@@ -305,6 +370,7 @@ if args.serve:
                     print(f'changed: {os.path.relpath(p, ROOT)}')
                 print('rebuilding...')
                 build(args.drafts)
+                _notify_clients()
                 last_mtimes = current_mtimes
     except KeyboardInterrupt:
         print('\nstopped.')
