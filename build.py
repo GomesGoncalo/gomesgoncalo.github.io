@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
-"""Build: generates static post HTML, posts.json, rss.xml, and sitemap.xml."""
+"""Build: generates static post HTML, posts.json, rss.xml, and sitemap.xml.
 
-import json, os, re
+Usage:
+  python3 build.py               # publish only (draft: false)
+  python3 build.py --drafts      # include draft posts
+"""
+
+import argparse, json, os, re
 from datetime import datetime, timezone
 from email.utils import format_datetime
 from html import escape as he
 import markdown as mdlib
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--drafts', action='store_true', help='include draft posts')
+args = parser.parse_args()
 
 ROOT      = os.path.dirname(os.path.abspath(__file__))
 POSTS_DIR = os.path.join(ROOT, 'blog', 'posts')
@@ -165,8 +174,16 @@ for fname in os.listdir(POSTS_DIR):
         'body':        body,
     })
 
-posts = [p for p in posts if p.get('draft') == 'false']
+if not args.drafts:
+    posts = [p for p in posts if p.get('draft') == 'false']
 posts.sort(key=lambda p: p['date'], reverse=True)
+
+# Remove stale generated HTML files (slugs no longer in the build)
+expected_html = {p['slug'] + '.html' for p in posts}
+for fname in os.listdir(POSTS_DIR):
+    if fname.endswith('.html') and fname not in expected_html:
+        os.remove(os.path.join(POSTS_DIR, fname))
+        print(f'removed stale: {fname}')
 
 # Static post HTML
 for p in posts:
