@@ -53,12 +53,15 @@ def format_date(date_str):
         return date_str
 
 def figcaptionify(html):
-    """Wrap <img title="..."> in <figure><figcaption> so titles render as visible captions."""
-    return re.sub(
+    """Wrap <img title="..."> in <figure><figcaption>, and add loading=lazy to all images."""
+    html = re.sub(
         r'<img\s([^>]*?)title="([^"]+)"([^>]*)>',
-        lambda m: f'<figure><img {m.group(1)}{m.group(3)}><figcaption>{he(m.group(2))}</figcaption></figure>',
+        lambda m: f'<figure><img loading="lazy" {m.group(1)}{m.group(3)}><figcaption>{he(m.group(2))}</figcaption></figure>',
         html
     )
+    # Add loading=lazy to any remaining images without it
+    html = re.sub(r'<img(?![^>]*loading=)', '<img loading="lazy"', html)
+    return html
 
 def render_post_html(p, prev_post=None, next_post=None):
     slug        = p['slug']
@@ -102,6 +105,19 @@ def render_post_html(p, prev_post=None, next_post=None):
 <link rel="stylesheet" href="../post.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
 <link rel="alternate" type="application/rss+xml" title="Gonçalo Gomes — Blog" href="/rss.xml">
+<script type="application/ld+json">{{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{he(title)}",
+  "description": "{he(description)}",
+  "url": "{post_url}",
+  "datePublished": "{p['date']}",
+  "author": {{
+    "@type": "Person",
+    "name": "Gonçalo Gomes",
+    "url": "https://gomesgoncalo.github.io/"
+  }}
+}}</script>
 </head>
 <body>
 
@@ -152,7 +168,7 @@ def render_post_html(p, prev_post=None, next_post=None):
 
 <footer>
   <div class="container">
-    <a href="../index.html">← all posts</a>
+    <a href="../../index.html">portfolio</a>
   </div>
 </footer>
 
@@ -287,7 +303,6 @@ RELOAD_ONLY_FILES = [
     os.path.join(ROOT, 'blog', 'post.css'),
     os.path.join(ROOT, 'blog', 'post-utils.js'),
     os.path.join(ROOT, 'blog', 'index.html'),
-    os.path.join(ROOT, 'blog', 'post.html'),
     os.path.join(ROOT, 'index.html'),
     os.path.join(ROOT, '404.html'),
 ]
