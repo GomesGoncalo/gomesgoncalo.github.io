@@ -350,21 +350,26 @@
     return bodiesLoadingPromise;
   }
 
-  function renderTagFilters() {
+  function renderTagFilters(filtered) {
     const container = document.getElementById('tag-filters');
-    const counts = {};
-    allPosts.forEach(p => (p.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
-    const allTags = Object.keys(counts).sort();
+    // Total counts across all posts (to know which tags exist)
+    const totalCounts = {};
+    allPosts.forEach(p => (p.tags || []).forEach(t => { totalCounts[t] = (totalCounts[t] || 0) + 1; }));
+    // Visible counts from the currently filtered posts
+    const visibleCounts = {};
+    filtered.forEach(p => (p.tags || []).forEach(t => { visibleCounts[t] = (visibleCounts[t] || 0) + 1; }));
+    const allTags = Object.keys(totalCounts).sort();
     container.innerHTML = allTags.map(t =>
-      `<button class="tag-filter${activeTags.has(t) ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)} <span class="tag-count">(${counts[t]})</span></button>`
+      `<button class="tag-filter${activeTags.has(t) ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)} <span class="tag-count">(${visibleCounts[t] || 0})</span></button>`
     ).join('');
   }
 
   function filterByTag(tag) {
     if (activeTags.has(tag)) activeTags.delete(tag);
     else activeTags.add(tag);
-    renderTagFilters();
-    renderPosts(getFiltered());
+    const filtered = getFiltered();
+    renderTagFilters(filtered);
+    renderPosts(filtered);
   }
 
   function renderPosts(posts) {
@@ -448,8 +453,9 @@
         content:     null,
       }));
 
-      renderTagFilters();
-      renderPosts(getFiltered());
+      const filtered = getFiltered();
+      renderTagFilters(filtered);
+      renderPosts(filtered);
     } catch (err) {
       list.innerHTML = '<div class="empty-state">Could not load posts.</div>';
       console.error(err);
@@ -462,14 +468,24 @@
 
     input.addEventListener('input', async e => {
       currentQuery = e.target.value;
-      renderPosts(getFiltered());
+      let filtered = getFiltered();
+      renderTagFilters(filtered);
+      renderPosts(filtered);
       if (currentQuery.trim()) {
         await ensureBodiesLoaded();
-        renderPosts(getFiltered());
+        filtered = getFiltered();
+        renderTagFilters(filtered);
+        renderPosts(filtered);
       }
     });
     input.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { input.value = ''; currentQuery = ''; renderPosts(getFiltered()); input.blur(); }
+      if (e.key === 'Escape') {
+        input.value = ''; currentQuery = '';
+        const filtered = getFiltered();
+        renderTagFilters(filtered);
+        renderPosts(filtered);
+        input.blur();
+      }
     });
     input.addEventListener('focus', () => hint.style.display = 'none');
     input.addEventListener('blur',  () => { if (!input.value) hint.style.display = ''; });
