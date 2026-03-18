@@ -16,7 +16,7 @@ So naturally, ten months in, I signed up for the Open.
 
 ## What Is the CrossFit Open?
 
-For the uninitiated: the Open is a worldwide online competition run by CrossFit every
+For the uninitiated: the Open is a worldwide competition run by CrossFit every
 year. Anyone can enter. You do the same workouts as the top athletes in the world,
 submit your score, and get ranked globally. The gap between you and those athletes
 will be humbling. That is, apparently, the point.
@@ -150,7 +150,7 @@ I just asked to scale it. So it became:
 
 117 reps
 
-I was a little disappointed, but at the same time I do not do CrossFit just to get the 1 rep in the leaderboard, I do it to get fitter and stronger. I know that if I had RXed this workout, I would have been stuck in the first line of lunges for the entire 15 minutes, and that would not have been fun at all.
+I was a little disappointed, but at the same time I do not do CrossFit just to get the 1 rep in the leaderboard, I do it to get fitter and stronger. I know that if I had RXed this workout, it would not have been fun at all.
 
 ## 26.3
 
