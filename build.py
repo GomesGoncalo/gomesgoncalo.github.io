@@ -60,7 +60,7 @@ def figcaptionify(html):
         html
     )
 
-def render_post_html(p):
+def render_post_html(p, prev_post=None, next_post=None):
     slug        = p['slug']
     title       = p['title']
     description = p['description']
@@ -97,7 +97,7 @@ def render_post_html(p):
 <link rel="canonical" href="{post_url}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script>if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');</script>
+<script>(function(){{var t=localStorage.getItem('theme');if(t==='light'||(t===null&&window.matchMedia('(prefers-color-scheme: light)').matches))document.documentElement.classList.add('light');}})();</script>
 <link rel="stylesheet" href="../../shared.css">
 <link rel="stylesheet" href="../post.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
@@ -142,7 +142,10 @@ def render_post_html(p):
     </article>
     <div class="post-nav">
       <a href="../index.html">← all posts</a>
-      <a href="../../index.html">portfolio</a>
+      <div class="post-nav-siblings">
+        {f'<a href="{he(next_post["slug"])}.html" class="post-nav-prev">← {he(next_post["title"])}</a>' if next_post else ''}
+        {f'<a href="{he(prev_post["slug"])}.html" class="post-nav-next">{he(prev_post["title"])} →</a>' if prev_post else ''}
+      </div>
     </div>
   </div>
 </main>
@@ -200,10 +203,12 @@ def build(include_drafts):
             print(f'removed stale: {fname}')
 
     # Static post HTML
-    for p in posts:
+    for i, p in enumerate(posts):
+        prev_post = posts[i - 1] if i > 0 else None           # newer post
+        next_post = posts[i + 1] if i < len(posts) - 1 else None  # older post
         out_path = os.path.join(POSTS_DIR, p['slug'] + '.html')
         with open(out_path, 'w', encoding='utf-8') as f:
-            f.write(render_post_html(p))
+            f.write(render_post_html(p, prev_post, next_post))
     print(f'posts/*.html: {len(posts)} file(s)')
 
     # posts.json
@@ -276,6 +281,17 @@ ASSETS_DIR = os.path.join(POSTS_DIR, 'assets')
 
 IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.avif'}
 
+RELOAD_ONLY_FILES = [
+    os.path.join(ROOT, 'shared.css'),
+    os.path.join(ROOT, 'shared.js'),
+    os.path.join(ROOT, 'blog', 'post.css'),
+    os.path.join(ROOT, 'blog', 'post-utils.js'),
+    os.path.join(ROOT, 'blog', 'index.html'),
+    os.path.join(ROOT, 'blog', 'post.html'),
+    os.path.join(ROOT, 'index.html'),
+    os.path.join(ROOT, '404.html'),
+]
+
 def get_mtimes():
     mtimes = {}
     # .md files and build script trigger a full rebuild
@@ -285,6 +301,10 @@ def get_mtimes():
             mtimes[full] = ('rebuild', os.stat(full).st_mtime)
     build_py = os.path.join(ROOT, 'build.py')
     mtimes[build_py] = ('rebuild', os.stat(build_py).st_mtime)
+    # CSS/JS/HTML files only need a browser reload
+    for path in RELOAD_ONLY_FILES:
+        if os.path.isfile(path):
+            mtimes[path] = ('reload', os.stat(path).st_mtime)
     # asset files only need a browser reload
     if os.path.isdir(ASSETS_DIR):
         for fname in os.listdir(ASSETS_DIR):

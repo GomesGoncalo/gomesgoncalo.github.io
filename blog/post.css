@@ -238,6 +238,20 @@ pre:hover .copy-btn { opacity: 1; }
   transition: color 0.2s;
 }
 .post-nav a:hover { color: var(--green); }
+.post-nav-siblings {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.post-nav-prev, .post-nav-next {
+  font-size: 12px;
+  max-width: 240px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 @media (max-width: 600px) {
   .post-content pre { font-size: 12px; padding: 1rem; }

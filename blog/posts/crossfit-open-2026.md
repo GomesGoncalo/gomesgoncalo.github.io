@@ -29,7 +29,7 @@ Although I wanted to RX things, I had no expectation of actually doing it. I was
 
 Oh man, the announcement.
 
-![The Workout... Or is it?](./assets/crossfit261isit.png "The Workout... Or is it?")
+![The Workout... Or is it?](./assets/crossfit261isit.webp "The Workout... Or is it?")
 
 Now at this point I think to myself, ouch ok I'm good at box jump-overs but this is way too many wall balls.
 
